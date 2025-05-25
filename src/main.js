@@ -223,9 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (pieceStyleSelector) {
-        pieceStyleSelector.addEventListener('change', (event) => {
-            ui.setPieceStyle(event.target.value);
+        pieceStyleSelector.addEventListener('change', async (event) => {
+            await ui.setPieceStyle(event.target.value);
             console.log("Piece style changed to:", event.target.value);
+            ui.updateBoard(game); // Re-render board with new pieces
+            updateStatus();
         });
     }
 
@@ -245,8 +247,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Initial Setup ---
-    ui.updateBoard(game); // Render the initial board state
-    updateStatus();       // Set the initial status message
-
-    console.log("Chess PWA main.js initialized with AI integration attempt.");
+    // The initial board state and status will be set after the initial piece set is loaded by ui.loadInitialPieceSet()
+    // ui.updateBoard(game); // Render the initial board state
+    // updateStatus();       // Set the initial status message
+    
+    // Ensure initial piece set is loaded and then update board and status
+    ui.loadInitialPieceSet().then(() => {
+        ui.updateBoard(game);
+        updateStatus();
+        console.log("Chess PWA main.js initialized with AI integration attempt.");
+    });
 });

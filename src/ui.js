@@ -1,11 +1,12 @@
 import { Chessground } from 'chessground';
+import PieceManager from './pieces.js'; // Import PieceManager
 
 // Import necessary CSS for chessground
 // These paths assume Vite can resolve them from node_modules.
 // 'chessground/dist/chessground.css' usually includes base styles and a default theme (like brown).
 // 'chessground/dist/pieces/cburnett.css' is for the cburnett piece style.
-import 'chessground/dist/chessground.css'; 
-import 'chessground/dist/pieces/cburnett.css'; 
+import 'chessground/dist/chessground.css';
+// import 'chessground/dist/pieces/cburnett.css'; // This will be managed by PieceManager
 // If specific themes like 'blue' are needed, their CSS would also be imported, e.g.:
 // import 'chessground/dist/theme/blue.css'; // Or similar path
 
@@ -17,6 +18,7 @@ class ChessUI {
         this.boardContainer = boardContainerElement;
         this.onUserMove = config.onUserMove || (() => {}); // Callback for when a user makes a move
         this.gameInstance = null; // Will be set by updateBoard or a dedicated method
+        this.pieceManager = new PieceManager(); // Initialize PieceManager
 
         // Initial Chessground configuration
         this.ground = Chessground(boardContainerElement, {
@@ -31,7 +33,7 @@ class ChessUI {
                     // Pass the move to the main logic controller (via callback)
                     this.onUserMove(orig, dest);
                 },
-                select: (key) => { 
+                select: (key) => {
                     // When a square is selected, show legal moves for that piece
                     if (this.gameInstance) {
                         this.showLegalMovesForPiece(this.gameInstance, key);
@@ -42,9 +44,10 @@ class ChessUI {
             turnColor: 'white',   // Color of the side to move
             check: null,          // Key of the king in check, or false/null
             lastMove: null,       // Array [orig, dest] of the last move
-            // Default theme (brown) and piece set (cburnett) are usually applied via imported CSS.
-            // Additional themes/piece sets would require loading their respective CSS files.
+            // Piece set will be loaded dynamically by PieceManager
         });
+
+        this.loadInitialPieceSet(); // Load the piece set saved in local storage or default
     }
 
     // Calculate legal destinations for chessground based on the game instance
@@ -55,7 +58,7 @@ class ChessUI {
         const dests = new Map();
         // Ensure getAllLegalMoves returns moves in a format suitable for Chessground:
         // [{ from: 'e2', to: 'e4', san: 'e4', ...}, ...]
-        const legalMoves = gameInstance.getAllLegalMoves(); 
+        const legalMoves = gameInstance.getAllLegalMoves();
         
         legalMoves.forEach(move => {
             if (!dests.has(move.from)) {
@@ -191,35 +194,27 @@ class ChessUI {
         }
     }
 
-    // Update piece style (placeholder - requires CSS management or re-init)
-    setPieceStyle(styleName) {
-        console.log(`UI: Piece style selected - ${styleName}. Ensure CSS/assets for this style are handled.`);
-        // Piece styles are also CSS-driven. E.g., `chessground.cburnett.css`, `chessground.merida.css`.
-        // Similar to themes, one would typically switch CSS files or classes.
-        // Chessground might also allow `piece.assetPath` in `set` if pieces are individual SVGs.
-        // For CSS-based piece sets (like cburnett, merida from chessground distribution):
-        // The piece CSS files often target classes on the `cg-wrap` or `cg-board` element.
-        const cgWrap = this.boardContainer.querySelector('.cg-wrap');
-        if (cgWrap) {
-            // Remove existing piece style classes
-            const pieceStyles = ['cburnett', 'merida', 'leipzig', 'alpha']; // Add all supported piece style names
-            pieceStyles.forEach(ps => cgWrap.classList.remove(`piece-style-${ps}`)); // Assuming a convention like .piece-style-cburnett
-            // Add new piece style class
-            cgWrap.classList.add(`piece-style-${styleName}`);
-            
-            // This requires that the CSS for each piece style (e.g., chessground.merida.css)
-            // is loaded and uses selectors like `.cg-wrap.piece-style-merida piece { ... }`.
-            // Chessground's default piece CSS (e.g., chessground.cburnett.css) might apply styles directly
-            // without needing an extra class if it's the only one loaded. If multiple are loaded,
-            // they need to be scoped or switched.
-            // For this to work, the individual piece style CSS files (e.g. chessground/dist/pieces/merida.css)
-            // must be imported in main.js or ui.js.
+    async setPieceStyle(styleName) {
+        console.log(`UI: Attempting to set piece style to: ${styleName}`);
+        const loadedPieces = await this.pieceManager.loadSet(styleName);
+        if (loadedPieces) {
+            this.ground.set({
+                // This assumes `loadedPieces` is an object where keys are piece names (e.g., 'wp', 'bk')
+                // and values are SVG strings or paths. Chessground's `pieces` config expects this.
+                // If it's a path, it would be `pieces: { assetPath: loadedPieces }`
+                // For now, we assume `loadedPieces` directly contains the SVG map.
+                pieces: loadedPieces
+            });
+            console.log(`UI: Piece style set to ${styleName}.`);
         } else {
-            console.warn("Chessground wrapper not found for piece style switching.");
+            console.warn(`UI: Could not load piece style ${styleName}.`);
         }
-        // If piece styles are managed by `pieces.assetPath` (e.g., for custom SVG sets not part of chessground dist):
-        // this.ground.set({ pieces: { assetPath: `/path/to/pieces/${styleName}/` } });
-        // This would then require `main.js` to provide these assets.
+    }
+
+    async loadInitialPieceSet() {
+        const initialSet = this.pieceManager.getSelectedSet();
+        console.log(`UI: Loading initial piece set: ${initialSet}`);
+        await this.setPieceStyle(initialSet); // Use the setPieceStyle method to load and apply
     }
 }
 
