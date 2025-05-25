@@ -278,4 +278,24 @@ document.addEventListener('DOMContentLoaded', () => {
         updateStatus();
         console.log("Chess PWA main.js initialized with AI integration attempt.");
     });
+
+    // --- Options Panel Toggle ---
+    const toggleOptionsBtn = document.getElementById('toggle-options-btn');
+    const sideControlsPanel = document.getElementById('side-controls');
+
+    if (toggleOptionsBtn && sideControlsPanel) {
+        // Initial state is visible (no 'hidden' class on panel, aria-expanded="true" on button)
+        // as set in index.html.
+
+        toggleOptionsBtn.addEventListener('click', () => {
+            const isExpanded = toggleOptionsBtn.getAttribute('aria-expanded') === 'true';
+            sideControlsPanel.classList.toggle('hidden');
+            toggleOptionsBtn.setAttribute('aria-expanded', String(!isExpanded));
+            
+            // Optional: Change button text or add visual cues like chevron rotation
+            // For example:
+            // toggleOptionsBtn.textContent = !isExpanded ? 'Hide Options' : 'Show Options Menu';
+        });
+    }
+    // --- End Options Panel Toggle ---
 });
