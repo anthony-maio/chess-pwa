@@ -145,6 +145,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 message += ' (Check!)'; // Show check only if it's player's turn or local game
             }
         }
+
+        // --- Add Move History ---
+        const history = game.chess.history();
+        let formattedHistory = "";
+        if (history.length > 0) {
+            for (let i = 0; i < history.length; i += 2) {
+                formattedHistory += `${(i / 2) + 1}. ${history[i]}`;
+                if (history[i+1]) {
+                    formattedHistory += ` ${history[i+1]}`;
+                }
+                // Add a space after each pair or single move, trim at the end
+                formattedHistory += " "; 
+            }
+            formattedHistory = formattedHistory.trim();
+            
+            // Append to the status message, perhaps with a clear separator
+            // Using a newline for potential multi-line display in the status bar
+            message += `\nHistory: ${formattedHistory}`;
+        }
+        // --- End Add Move History ---
+
         statusBar.textContent = message;
     }
 
@@ -257,4 +278,24 @@ document.addEventListener('DOMContentLoaded', () => {
         updateStatus();
         console.log("Chess PWA main.js initialized with AI integration attempt.");
     });
+
+    // --- Options Panel Toggle ---
+    const toggleOptionsBtn = document.getElementById('toggle-options-btn');
+    const sideControlsPanel = document.getElementById('side-controls');
+
+    if (toggleOptionsBtn && sideControlsPanel) {
+        // Initial state is visible (no 'hidden' class on panel, aria-expanded="true" on button)
+        // as set in index.html.
+
+        toggleOptionsBtn.addEventListener('click', () => {
+            const isExpanded = toggleOptionsBtn.getAttribute('aria-expanded') === 'true';
+            sideControlsPanel.classList.toggle('hidden');
+            toggleOptionsBtn.setAttribute('aria-expanded', String(!isExpanded));
+            
+            // Optional: Change button text or add visual cues like chevron rotation
+            // For example:
+            // toggleOptionsBtn.textContent = !isExpanded ? 'Hide Options' : 'Show Options Menu';
+        });
+    }
+    // --- End Options Panel Toggle ---
 });
