@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Chess PWA</title>
+    <!-- Vite PWA plugin will automatically inject the manifest link -->
+    <link rel="stylesheet" href="src/styles/main.css">
+    <link rel="icon" href="icons/icon-192.png" type="image/png">
+    <!-- Service Worker registration is handled automatically by Vite PWA plugin -->
+</head>
+<body class="h-full bg-gray-100 text-gray-800 font-sans flex flex-col">
+
+    <div id="app-container" class="app-container flex flex-col min-h-screen p-2 sm:p-4">
+
+        <header class="top-controls bg-gray-200 p-2 sm:p-3 rounded-md shadow mb-2 sm:mb-4">
+            <div class="flex flex-wrap gap-2 sm:gap-3 justify-center">
+                <!-- Game Control Buttons -->
+                <div class="flex space-x-2">
+                    <button id="new-game-btn" class="px-3 sm:px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">New Game</button>
+                    <button id="play-as-black-btn" class="px-3 sm:px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-75">Play as Black</button>
+                    <button id="undo-btn" class="px-3 sm:px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75">Undo</button>
+                    <button id="flip-board-btn" class="px-3 sm:px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75">Flip Board</button>
+                </div>
+                
+                <!-- Settings Controls -->
+                <div class="flex flex-wrap gap-2 items-center">
+                    <div class="flex items-center space-x-1">
+                        <label for="difficulty-selector" class="text-xs font-medium text-gray-700">Difficulty:</label>
+                        <select id="difficulty-selector" class="text-xs p-1 border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="easy" selected>Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-center space-x-1">
+                        <label for="theme-selector" class="text-xs font-medium text-gray-700">Theme:</label>
+                        <select id="theme-selector" class="text-xs p-1 border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="brown">Brown</option>
+                            <option value="blue">Blue</option>
+                            <option value="green" selected>Green</option>
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-center space-x-1">
+                        <label for="piece-style-selector" class="text-xs font-medium text-gray-700">Pieces:</label>
+                        <select id="piece-style-selector" class="text-xs p-1 border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="cburnett">Cburnett</option>
+                            <option value="alpha">Alpha</option>
+                            <option value="merida">Merida</option>
+                            <option value="leipzig">Leipzig</option>
+                            <option value="california">California</option>
+                            <option value="cardinal">Cardinal</option>
+                            <option value="chess7">Chess7</option>
+                            <option value="chessnut">Chessnut</option>
+                            <option value="companion">Companion</option>
+                            <option value="fantasy">Fantasy</option>
+                            <option value="fresca">Fresca</option>
+                            <option value="gioco">Gioco</option>
+                            <option value="governor">Governor</option>
+                            <option value="horsey" selected>Horsey</option>
+                            <option value="kosal">Kosal</option>
+                            <option value="maestro">Maestro</option>
+                            <option value="monarchy">Monarchy</option>
+                            <option value="pirouetti">Pirouetti</option>
+                            <option value="pixel">Pixel</option>
+                            <option value="reillycraig">Reilly Craig</option>
+                            <option value="spatial">Spatial</option>
+                            <option value="staunty">Staunty</option>
+                            <option value="tatiana">Tatiana</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-center space-x-1">
+                        <input type="checkbox" id="sound-enabled" class="text-xs rounded border-gray-300 focus:ring-indigo-500 focus:border-indigo-500" checked>
+                        <label for="sound-enabled" class="text-xs font-medium text-gray-700 cursor-pointer">🔊 Sound</label>
+                        <button id="test-sound-btn" class="text-xs px-2 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-400" title="Test sound">🔔</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content flex flex-col flex-grow">
+            <div id="board-area" class="flex-grow flex justify-center items-center p-2">
+                <div id="board-container" class="board-container w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl aspect-square bg-white shadow-lg rounded-md border border-gray-300">
+                    <!-- Chessboard will be rendered here by Chessground -->
+                </div>
+            </div>
+        </main>
+
+        <footer class="status-footer mt-2 sm:mt-4 space-y-2">
+            <div id="status-bar" class="status-bar bg-gray-200 p-3 rounded-md shadow text-center text-sm text-gray-700" role="status" aria-live="polite">
+                Game status will appear here.
+            </div>
+            <div id="move-history" class="move-history bg-gray-100 p-3 rounded-md shadow">
+                <h4 class="text-xs font-semibold text-gray-600 mb-2">Move History</h4>
+                <div id="history-content" class="text-xs text-gray-700 max-h-20 overflow-y-auto font-mono leading-relaxed">
+                    Game moves will appear here.
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Promotion Modal -->
+    <div id="promotion-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 shadow-xl">
+            <h3 class="text-lg font-semibold mb-4 text-center">Choose promotion piece:</h3>
+            <div class="flex space-x-4 justify-center">
+                <button id="promote-queen" class="promotion-btn w-16 h-16 bg-gray-100 hover:bg-gray-200 border-2 border-gray-300 rounded-lg flex items-center justify-center text-2xl transition-colors">
+                    ♛
+                </button>
+                <button id="promote-rook" class="promotion-btn w-16 h-16 bg-gray-100 hover:bg-gray-200 border-2 border-gray-300 rounded-lg flex items-center justify-center text-2xl transition-colors">
+                    ♜
+                </button>
+                <button id="promote-bishop" class="promotion-btn w-16 h-16 bg-gray-100 hover:bg-gray-200 border-2 border-gray-300 rounded-lg flex items-center justify-center text-2xl transition-colors">
+                    ♝
+                </button>
+                <button id="promote-knight" class="promotion-btn w-16 h-16 bg-gray-100 hover:bg-gray-200 border-2 border-gray-300 rounded-lg flex items-center justify-center text-2xl transition-colors">
+                    ♞
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>
