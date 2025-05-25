@@ -6,6 +6,11 @@ import PieceManager from './pieces.js'; // Import PieceManager
 // 'chessground/dist/chessground.css' usually includes base styles and a default theme (like brown).
 // 'chessground/dist/pieces/cburnett.css' is for the cburnett piece style.
 import 'chessground/dist/chessground.css';
+import 'chessground/dist/theme/blue.css';
+import 'chessground/dist/theme/brown.css';
+import 'chessground/dist/theme/green.css';
+import 'chessground/dist/theme/light.css';
+import 'chessground/dist/theme/dark.css';
 // import 'chessground/dist/pieces/cburnett.css'; // This will be managed by PieceManager
 // If specific themes like 'blue' are needed, their CSS would also be imported, e.g.:
 // import 'chessground/dist/theme/blue.css'; // Or similar path
