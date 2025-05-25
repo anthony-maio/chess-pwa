@@ -11,6 +11,7 @@ export default defineConfig({
   // Vite's default root is process.cwd() where the vite command is run.
   // If we run `vite` from `/app/chess-pwa/`, then root defaults to `/app/chess-pwa`.
   // Let's be explicit for clarity.
+  base: '/chess-pwa/',
   root: '.',
   publicDir: 'public', // relative to root. So, chess-pwa/public
   build: {
