@@ -1,3 +1,4 @@
+import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -21,13 +22,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto', // This handles the SW registration
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,wasm}'], // Cache common assets
-        // Ensure that all piece sets and styles are cached.
-        // VitePWA should pick up assets from the publicDir automatically if they are part of globPatterns.
-        // For files copied from public/ to dist/ (like those in public/pieces/ and public/piece-css/),
-        // they should be matched by the globPatterns if their paths in `dist` are like `pieces/...` or `piece-css/...`
-        // which is typical.
+      strategies: 'injectManifest',
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,wasm,nnue}'],
+        maximumFileSizeToCacheInBytes: 45000000
       },
       manifest: {
         name: 'Offline Chess PWA',

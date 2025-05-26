@@ -18,9 +18,9 @@ class PieceManager {
     }
 
     /**
-     * Loads a specific piece set by dynamically importing its SVG data.
+     * Loads a specific piece set by fetching SVG URLs from the public directory.
      * @param {string} setName - The name of the piece set to load (e.g., 'alpha', 'merida').
-     * @returns {Promise<object>} A promise that resolves with the SVG piece data.
+     * @returns {Promise<object>} A promise that resolves with the SVG piece data URLs.
      */
     async loadSet(setName) {
         try {
@@ -30,19 +30,23 @@ class PieceManager {
                 return null;
             }
 
-            // Dynamically import the SVG data for the selected piece set.
-            // The path assumes piece sets are structured under public/pieces/[setName]/index.js
-            // The actual SVG data should be exported from these index.js files.
-            const pieceSetModule = await import(`../public/pieces/${setName}/index.js`);
-            
+            // List of all standard chess piece codes
+            const pieceCodes = [
+                'wK', 'wQ', 'wR', 'wB', 'wN', 'wP',
+                'bK', 'bQ', 'bR', 'bB', 'bN', 'bP'
+            ];
+            const pieces = {};
+            for (const code of pieceCodes) {
+                // Construct the URL to the SVG in the public directory
+                pieces[code] = `/pieces/${setName}/${code}.svg`;
+            }
+
             this.selectedSet = setName;
             saveToLocalStorage(STORAGE_KEYS.PIECE_SET, setName);
-            
-            return pieceSetModule.default; // Assuming default export of SVG data
+            return pieces;
         } catch (error) {
             console.error(`Failed to load piece set "${setName}":`, error);
-            // Fallback to a default set or return null/throw error as appropriate
-            return null; 
+            return null;
         }
     }
 }

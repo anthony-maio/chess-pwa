@@ -1,19 +1,11 @@
 import { Chessground } from 'chessground';
 import PieceManager from './pieces.js'; // Import PieceManager
 
-// Import necessary CSS for chessground
-// These paths assume Vite can resolve them from node_modules.
-// 'chessground/dist/chessground.css' usually includes base styles and a default theme (like brown).
-// 'chessground/dist/pieces/cburnett.css' is for the cburnett piece style.
-//import 'chessground/dist/chessground.base.css';
-//import 'chessground/dist/theme/blue.css';
-//import 'chessground/dist/theme/brown.css';
-//import 'chessground/dist/theme/green.css';
-//import 'chessground/dist/theme/light.css';
-//import 'chessground/dist/theme/dark.css';
-// import 'chessground/dist/pieces/cburnett.css'; // This will be managed by PieceManager
-// If specific themes like 'blue' are needed, their CSS would also be imported, e.g.:
-// import 'chessground/dist/theme/blue.css'; // Or similar path
+// Import necessary CSS for chessground and pieces
+import 'chessground/assets/chessground.base.css'; // Base styles and default theme
+import 'chessground/dist/theme/blue.css';  // Blue theme
+// Piece style CSS from public directory cannot be imported directly in JS due to Vite restrictions.
+// Instead, it should be included via a <link> tag in index.html or dynamically loaded.
 
 class ChessUI {
     constructor(boardContainerElement, config = {}) {
@@ -87,12 +79,19 @@ class ChessUI {
         const lastMoveArray = gameInstance.chess.history({ verbose: true }).slice(-1)[0]; // More concise
         const lastMoveForGround = lastMoveArray ? [lastMoveArray.from, lastMoveArray.to] : null;
 
+        // Convert Map to plain object for Chessground
+        const destsMap = this.calculateLegalDests(gameInstance);
+        const destsObj = {};
+        for (const [key, value] of destsMap.entries()) {
+            destsObj[key] = value;
+        }
+
         this.ground.set({
             fen: fen,
             turnColor: turn === 'w' ? 'white' : 'black',
             movable: {
                 color: turn === 'w' ? 'white' : 'black', // Player whose turn it is
-                dests: this.calculateLegalDests(gameInstance),
+                dests: destsObj,
                 free: false, // Always restricted by game rules
                 showDests: true,
             },
@@ -203,12 +202,10 @@ class ChessUI {
         console.log(`UI: Attempting to set piece style to: ${styleName}`);
         const loadedPieces = await this.pieceManager.loadSet(styleName);
         if (loadedPieces) {
+            // Convert loadedPieces object to Map for Chessground compatibility
+            const piecesMap = new Map(Object.entries(loadedPieces));
             this.ground.set({
-                // This assumes `loadedPieces` is an object where keys are piece names (e.g., 'wp', 'bk')
-                // and values are SVG strings or paths. Chessground's `pieces` config expects this.
-                // If it's a path, it would be `pieces: { assetPath: loadedPieces }`
-                // For now, we assume `loadedPieces` directly contains the SVG map.
-                pieces: loadedPieces
+                pieces: piecesMap
             });
             console.log(`UI: Piece style set to ${styleName}.`);
         } else {
