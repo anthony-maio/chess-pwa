@@ -40,8 +40,8 @@ export function initAI(readyCallback, moveCallback) {
         }
     };
 
-    // Trigger worker initialization
-    stockfishWorker.postMessage({ type: 'init' });
+      // Pass the base URL from Vite's import.meta.env.BASE_URL to the worker
+    stockfishWorker.postMessage({ type: 'init', baseUrl: import.meta.env.BASE_URL });
 }
 
 export function requestAIMove(fen, difficulty) { // difficulty: "Easy", "Medium", "Hard"

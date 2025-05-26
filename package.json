@@ -1,6 +1,6 @@
 {
   "name": "chess-pwa",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "main": "src/main.js",
   "type": "module",
@@ -11,16 +11,16 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",
+    "gh-pages": "^6.1.1",
     "postcss": "^8.4.27",
-    "tailwindcss": "^3.3.3",
+    "tailwindcss": "^3.4.17",
     "vite": "^5.2.8",
-    "vite-plugin-pwa": "^0.20.0",
-    "gh-pages": "^6.1.1"
+    "vite-plugin-pwa": "^0.20.0"
   },
   "dependencies": {
     "chess.js": "^1.0.0-beta.8",
     "chessground": "^9.0.4",
-    "stockfish:": "^16.0.0",
+    "stockfish": "^16.0.0",
     "stockfish.js": "^10.0.2"
   }
 }

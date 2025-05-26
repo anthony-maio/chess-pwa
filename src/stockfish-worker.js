@@ -3,8 +3,57 @@
 // Detect if WebAssembly is supported
 var wasmSupported = typeof WebAssembly === 'object' && WebAssembly.validate(Uint8Array.of(0x0,0x61,0x73,0x6d,0x01,0x00,0x00,0x00));
 
-// Load the appropriate Stockfish engine script
-importScripts(wasmSupported ? 'stockfish.wasm.js' : 'stockfish.js');
+let _baseUrl = '/'; // Default to root, will be updated by init message
 
-// The Stockfish engine script defines onmessage and postMessage handlers globally,
-// so no additional code is needed here.
+// Handle messages from the main thread
+self.onmessage = (event) => {
+    const data = event.data;
+    switch (data.type) {
+        case 'init':
+            _baseUrl = data.baseUrl || '/'; // Set the base URL from the main thread
+            // Now, load the Stockfish engine script after receiving the base URL
+            try {
+                // Construct the full URL using the received base URL
+                const stockfishScriptUrl = wasmSupported ? 
+                    `${_baseUrl}stockfish/stockfish.wasm.js` : 
+                    `${_baseUrl}stockfish/stockfish.js`;
+                
+                importScripts(stockfishScriptUrl);
+                // After importScripts, the Stockfish global handlers are available
+                self.postMessage({ type: 'ready' }); // Signal that Stockfish is ready
+            } catch (error) {
+                console.error("Worker: Error during Stockfish initialization.", error);
+                self.postMessage({ type: 'error', message: `Failed to initialize Stockfish: ${error.message}` });
+            }
+            break;
+        case 'setoption':
+            // Assume Stockfish is loaded and its postMessage is available
+            // Check if Stockfish is initialized before attempting to use it
+            if (self.Stockfish && typeof self.Stockfish === 'function') { 
+                 self.Stockfish().postMessage(`setoption name ${data.name} value ${data.value}`);
+            } else {
+                console.warn("Stockfish not yet initialized, skipping setoption command.");
+            }
+            break;
+        case 'position':
+            if (self.Stockfish && typeof self.Stockfish === 'function') {
+                self.Stockfish().postMessage(`position fen ${data.fen}`);
+            } else {
+                console.warn("Stockfish not yet initialized, skipping position command.");
+            }
+            break;
+        case 'go':
+            if (self.Stockfish && typeof self.Stockfish === 'function') {
+                self.Stockfish().postMessage(data.command);
+            } else {
+                console.warn("Stockfish not yet initialized, skipping go command.");
+            }
+            break;
+        default:
+            console.debug("Worker received unhandled message:", data);
+    }
+};
+
+// Stockfish engine script defines onmessage and postMessage handlers globally.
+// We handle 'init' here to load the script dynamically with the correct base path.
+// Other messages like 'bestmove' from Stockfish will be handled by our main thread's onmessage handler.

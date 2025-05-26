@@ -2,8 +2,10 @@ import { Chessground } from 'chessground';
 import PieceManager from './pieces.js'; // Import PieceManager
 
 // Import necessary CSS for chessground and pieces
-import 'chessground/assets/chessground.base.css'; // Base styles and default theme
-import 'chessground/dist/theme/blue.css';  // Blue theme
+import './assets/chessground.css';
+import 'chessground/assets/chessground.base.css'; // Base styles and default them
+import 'chessground/assets/chessground.brown.css';  // Blue theme
+import 'chessground/assets/chessground.cburnett.css';  // Blue theme
 // Piece style CSS from public directory cannot be imported directly in JS due to Vite restrictions.
 // Instead, it should be included via a <link> tag in index.html or dynamically loaded.
 
@@ -186,7 +188,7 @@ class ChessUI {
         const cgWrap = this.boardContainer.querySelector('.cg-wrap');
         if (cgWrap) {
             // Remove existing theme classes (brown, blue, etc.)
-            const themes = ['brown', 'blue', 'green', 'light', 'dark']; // Add all supported theme names
+            const themes = ['brown']; // Add all supported theme names
             themes.forEach(t => cgWrap.classList.remove(t));
             // Add new theme class
             cgWrap.classList.add(themeName);
