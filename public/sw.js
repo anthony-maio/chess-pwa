@@ -8,8 +8,8 @@ import { precacheAndRoute } from 'workbox-precaching';
 precacheAndRoute(self.__WB_MANIFEST || []);
 
 // Optional: Add other Workbox strategies here, e.g., for runtime caching
-// import { registerRoute } from 'workbox-routing';
-// import { NetworkFirst } from 'workbox-strategies';
+//mport { registerRoute } from 'workbox-routing';
+//import { NetworkFirst } from 'workbox-strategies';
 
 // Example: Cache Google Fonts (runtime caching)
 /*

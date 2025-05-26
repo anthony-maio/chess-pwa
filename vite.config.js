@@ -14,10 +14,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto', 
-     // filename: 'sw.js', 
       strategies: 'injectManifest',
+      src: 'src/sw.js',
+      filename: 'sw.js', // Output service worker file in dist
       injectManifest: {
-        swSrc: 'src/sw.js', 
         globPatterns: ['**/*.{js,css,html,ico,png,svg,wasm,nnue}'],
         maximumFileSizeToCacheInBytes: 45000000
       },
