@@ -10,6 +10,14 @@ export function initAI(readyCallback, moveCallback) {
     // Create as a classic worker. Vite will bundle this.
     // The URL is relative to this file (ai.js) and points to stockfish-worker.js
     stockfishWorker = new Worker(new URL('./stockfish-worker.js', import.meta.url));
+// Log to indicate the worker is being initialized
+// Log to indicate the init message is being sent
+// Log the structure of the init message
+//console.log('Init message structure:', data);
+// Log the structure of the init message
+//console.log('Init message structure:', data);
+console.log('Sending init message to worker');
+console.log('Stockfish worker initialized');
 
     stockfishWorker.onmessage = (event) => {
         const data = event.data;

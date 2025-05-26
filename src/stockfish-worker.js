@@ -1,3 +1,5 @@
+// Log to indicate the script is being loaded
+console.log('Stockfish worker script loaded');
 // stockfish-worker.js - Web Worker script for Stockfish engine
 
 // Detect if WebAssembly is supported
@@ -8,10 +10,11 @@ let _baseUrl = '/'; // Default to root, will be updated by init message
 // Handle messages from the main thread
 self.onmessage = (event) => {
     const data = event.data;
+// Log the received message
+console.log('Received message:', data);
     switch (data.type) {
         case 'init':
-            _baseUrl = data.baseUrl || '/'; // Set the base URL from the main thread
-            // Now, load the Stockfish engine script after receiving the base URL
+            _baseUrl = data.baseUrl || '/'; 
             try {
                 // Construct the full URL using the received base URL
                 const stockfishScriptUrl = wasmSupported ? 

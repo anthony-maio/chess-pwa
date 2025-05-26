@@ -216,7 +216,8 @@ class ChessUI {
     }
 
     async loadInitialPieceSet() {
-        const initialSet = this.pieceManager.getSelectedSet();
+// Log the value returned by getFromLocalStorage
+        const initialSet = this.pieceManager.getSelectedSet() || 'cburnett';
         console.log(`UI: Loading initial piece set: ${initialSet}`);
         await this.setPieceStyle(initialSet); // Use the setPieceStyle method to load and apply
     }

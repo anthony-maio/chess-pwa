@@ -10,6 +10,9 @@ export default defineConfig({
   build: {
     outDir: 'dist', 
   },
+  	optimizeDeps:{
+		exclude:["@undecaf/zbar-wasm"]
+	},
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
