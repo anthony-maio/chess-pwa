@@ -4,8 +4,9 @@ import PieceManager from './pieces.js'; // Import PieceManager
 // Import necessary CSS for chessground and pieces
 import './assets/chessground.css';
 import 'chessground/assets/chessground.base.css'; // Base styles and default them
-import 'chessground/assets/chessground.brown.css';  // Blue theme
-import 'chessground/assets/chessground.cburnett.css';  // Blue theme
+import 'chessground/assets/chessground.brown.css';  // Brown theme (used as Light)
+import './assets/chessground.dark.css'; // Dark theme
+import 'chessground/assets/chessground.cburnett.css';  // cburnett piece style
 // Piece style CSS from public directory cannot be imported directly in JS due to Vite restrictions.
 // Instead, it should be included via a <link> tag in index.html or dynamically loaded.
 
@@ -46,6 +47,7 @@ class ChessUI {
             // Piece set will be loaded dynamically by PieceManager
         });
 
+        this.setTheme('light'); // Set light theme (brown) by default
         this.loadInitialPieceSet(); // Load the piece set saved in local storage or default
     }
 
@@ -81,20 +83,15 @@ class ChessUI {
         const lastMoveArray = gameInstance.chess.history({ verbose: true }).slice(-1)[0]; // More concise
         const lastMoveForGround = lastMoveArray ? [lastMoveArray.from, lastMoveArray.to] : null;
 
-        // Convert Map to plain object for Chessground
-        const destsMap = this.calculateLegalDests(gameInstance);
-        const destsObj = {};
-        for (const [key, value] of destsMap.entries()) {
-            destsObj[key] = value;
-        }
+        const destsMap = this.calculateLegalDests(gameInstance); // This line is fine, it returns a Map
 
         this.ground.set({
             fen: fen,
             turnColor: turn === 'w' ? 'white' : 'black',
             movable: {
-                color: turn === 'w' ? 'white' : 'black', // Player whose turn it is
-                dests: destsObj,
-                free: false, // Always restricted by game rules
+                color: turn === 'w' ? 'white' : 'black',
+                dests: destsMap, // Ensure this is the Map object itself
+                free: false,
                 showDests: true,
             },
             check: gameStatus.isCheck ? this.findKing(gameInstance, turn) : null,
@@ -169,32 +166,19 @@ class ChessUI {
         // console.log(`Piece ${squareKey} selected. Legal moves:`, legalMovesForSquare.map(m => m.to));
     }
 
-    // Update board theme (placeholder - requires CSS management)
-    setTheme(themeName) {
-        console.log(`UI: Theme selected - ${themeName}. Ensure CSS for this theme is loaded.`);
-        // Example of how one might switch themes if CSS classes are used:
-        // Remove old theme classes from this.boardContainer, add new one.
-        // e.g., this.boardContainer.classList.remove('brown', 'blue');
-        // this.boardContainer.classList.add(themeName);
-        // Chessground itself doesn't have a theme setter; it's CSS-driven.
-        // The boardContainer needs to be styled by chessground.css and theme files.
-        // For example, the 'chessground.brown.css' might apply styles to elements with a 'brown' class.
-        // Or themes might be distinct CSS files that are loaded/unloaded.
-        // A simple approach is to ensure all theme CSS files are imported if small,
-        // and then change a class on a parent element that Chessground's CSS selectors target.
-        // Chessground typically has classes like `cg-wrap.brown` or similar.
-        // We'd need to ensure `boardContainerElement` can have its class changed to affect the theme.
-        // Chessground's DOM structure: boardContainerElement -> cg-wrap -> cg-board
+    setTheme(themeName) { // themeName will be 'light' or 'dark'
         const cgWrap = this.boardContainer.querySelector('.cg-wrap');
         if (cgWrap) {
-            // Remove existing theme classes (brown, blue, etc.)
-            const themes = ['brown']; // Add all supported theme names
-            themes.forEach(t => cgWrap.classList.remove(t));
-            // Add new theme class
-            cgWrap.classList.add(themeName);
+            // Remove all potential theme classes
+            cgWrap.classList.remove('brown', 'light', 'dark', 'blue', 'green'); // Add any other old theme names if they existed
 
-            // Also ensure the main CSS file (e.g. chessground.css) and the specific theme CSS (e.g. blue.css) are loaded.
-            // For example, if `chessground/dist/theme/blue.css` contains `.cg-wrap.blue { ... }`
+            if (themeName === 'light') {
+                // For light theme, we use the existing 'brown' CSS rules.
+                cgWrap.classList.add('brown'); 
+            } else if (themeName === 'dark') {
+                cgWrap.classList.add('dark');
+            }
+            console.log(`UI: Theme set to ${themeName}.`);
         } else {
             console.warn("Chessground wrapper not found for theme switching.");
         }

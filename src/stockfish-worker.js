@@ -20,8 +20,45 @@ console.log('Received message:', data);
                 const stockfishScriptUrl = wasmSupported ? 
                     `${_baseUrl}stockfish/stockfish.wasm.js` : 
                     `${_baseUrl}stockfish/stockfish.js`;
+
+                if (wasmSupported) {
+                    self.Module = {
+                        locateFile: function(path, prefix) {
+                            // path examples: "stockfish.wasm", "stockfish.worker.js"
+                            // prefix examples: "/chess-pwa/stockfish/", "https://localhost:5173/chess-pwa/stockfish/" (if running from complex prefix)
+                            // _baseUrl is "/chess-pwa/"
+
+                            // If the path is already absolute, or a data URI, use it as is.
+                            if (path.startsWith("data:") || path.startsWith("http:") || path.startsWith("https:") || path.startsWith("/")) {
+                                return path;
+                            }
+
+                            // For .wasm and potentially other stockfish-specific files (.nnue, .js worker)
+                            // construct the path relative to the `_baseUrl` and the `stockfish` subdirectory.
+                            if (path.endsWith('.wasm') || path.endsWith('.nnue') || path.includes('worker.js')) {
+                                // Ensure _baseUrl ends with a slash if it's not just "/"
+                                const base = _baseUrl.endsWith('/') ? _baseUrl : _baseUrl + '/';
+                                let fullPath = `${base}stockfish/${path}`;
+                                // Remove any double slashes that might occur if _baseUrl is "/"
+                                fullPath = fullPath.replace(/\/\//g, '/'); 
+                                console.log(`Stockfish locateFile: resolving '${path}' to '${fullPath}'`);
+                                return fullPath;
+                            }
+                            
+                            // Fallback for other files, using the prefix Emscripten provides
+                            let resolved = prefix + path;
+                            resolved = resolved.replace(/\/\//g, '/'); 
+                            console.log(`Stockfish locateFile: resolving '${path}' with prefix to '${resolved}'`);
+                            return resolved;
+                        }
+                    };
+                    // We can remove wasmBinaryFile as locateFile should handle it.
+                    // If stockfish.wasm.js specifically looks for wasmBinaryFile first, keeping it might be safer
+                    // or it might conflict. Let's try with locateFile first.
+                    // self.Module.wasmBinaryFile = `${_baseUrl}stockfish/stockfish.wasm`; 
+                }
                 
-                importScripts(stockfishScriptUrl);
+                importScripts(stockfishScriptUrl); // This should now use Module.locateFile
                 // After importScripts, the Stockfish global handlers are available
                 self.postMessage({ type: 'ready' }); // Signal that Stockfish is ready
             } catch (error) {

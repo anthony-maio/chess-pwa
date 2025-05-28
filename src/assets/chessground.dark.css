@@ -1,0 +1,49 @@
+/* Dark Theme for Chessground */
+.cg-wrap.dark cg-board {
+  background-color: #5E7A9B; /* Darker squares */
+  /* SVG for alternating pattern - this one is for dark squares being darker blue-grey */
+  background-image: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4PSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIgogICAgIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0iY3Jpc3BFZGdlcyI+CjxnIGlkPSJhIj4KICA8ZyBpZD0iYiI+CiAgICA8ZyBpZD0iYyI+CiAgICAgIDxnIGlkPSJkIj4KICAgICAgICA8cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBpZD0iZSIgb3BhY2l0eT0iMCIvPgogICAgICAgIDx1c2UgeD0iMSIgeT0iMSIgaHJlZj0iI2UiIHg6aHJlZj0iI2UiLz4KICAgICAgICA8cmVjdCB5PSIxIiB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBpZD0iZiIgZmlsbD0iIzg4QTRDNiIgb3BhY2l0eT0iMSIvPgogICAgICAgIDx1c2UgeD0iMSIgeT0iLTEiIGhyZWY9IiNmIiB4OmhyZWY9IiNmIi8+CiAgICAgIDwvZz4KICAgICAgPHVzZSB4PSIyIiBocmVmPSIjZCIgeDpocmVmPSIjZCIvPgogICAgPC9nPgogICAgPHVzZSB4PSI0IiBocmVmPSIjYyIgeDpocmVmPSIjYyIvPgogIDwvZz4KICA8dXNlIHk9IjIiIGhyZWY9IiNiIiB4OmhyZWY9IiNiIi8+CjwvZz4KPHVzZSB5PSI0IiBocmVmPSIjYSIgeDpocmVmPSIjYSIvPgo8L3N2Zz4=');
+}
+
+.cg-wrap.dark cg-board square.move-dest {
+  background: radial-gradient(rgba(30, 120, 60, 0.7) 22%, #20A540 0, rgba(0, 0, 0, 0.5) 0, rgba(0, 0, 0, 0) 0);
+}
+.cg-wrap.dark cg-board square.premove-dest {
+  background: radial-gradient(rgba(30, 60, 120, 0.7) 22%, #2040A5 0, rgba(0, 0, 0, 0.5) 0, rgba(0, 0, 0, 0) 0);
+}
+.cg-wrap.dark cg-board square.oc.move-dest {
+  background: radial-gradient(transparent 0%, transparent 80%, rgba(30, 120, 0, 0.4) 80%);
+}
+.cg-wrap.dark cg-board square.oc.premove-dest {
+  background: radial-gradient(transparent 0%, transparent 80%, rgba(30, 60, 120, 0.3) 80%);
+}
+.cg-wrap.dark cg-board square.move-dest:hover {
+  background: rgba(30, 120, 60, 0.4);
+}
+.cg-wrap.dark cg-board square.premove-dest:hover {
+  background: rgba(30, 60, 120, 0.3);
+}
+.cg-wrap.dark cg-board square.last-move {
+  background-color: rgba(200, 200, 0, 0.3); /* Adjusted for dark theme */
+}
+.cg-wrap.dark cg-board square.selected {
+  background-color: rgba(30, 100, 180, 0.4); /* Adjusted for dark theme */
+}
+.cg-wrap.dark cg-board square.check {
+  background: radial-gradient(ellipse at center, rgba(255,50,50,1) 0%, rgba(231,50,50,1) 25%, rgba(169,0,0,0) 89%, rgba(158,0,0,0) 100%);
+}
+.cg-wrap.dark cg-board square.current-premove {
+  background-color: rgba(30, 60, 120, 0.4); /* Adjusted for dark theme */
+}
+
+.cg-wrap.dark coords.ranks coord,
+.cg-wrap.dark coords.files coord {
+  color: rgba(255, 255, 255, 0.7); /* Light coordinates for dark theme */
+}
+/* Keep alternating colors subtle if needed, or make them uniform light */
+.cg-wrap.dark.orientation-white coords.ranks coord:nth-child(2n),
+.cg-wrap.dark.orientation-white coords.files coord:nth-child(2n),
+.cg-wrap.dark.orientation-black coords.ranks coord:nth-child(2n + 1),
+.cg-wrap.dark.orientation-black coords.files coord:nth-child(2n + 1) {
+  color: rgba(200, 200, 200, 0.7); 
+}
