@@ -20,6 +20,20 @@ console.log('Received message:', data);
                 const stockfishScriptUrl = wasmSupported ? 
                     `${_baseUrl}stockfish/stockfish.wasm.js` : 
                     `${_baseUrl}stockfish/stockfish.js`;
+
+                // Explicitly tell Emscripten where to find the .wasm file
+                if (wasmSupported) {
+                    self.Module = {
+                        wasmBinaryFile: `${_baseUrl}stockfish/stockfish.wasm`,
+                        // Optional: provide a locateFile function if wasmBinaryFile isn't enough
+                        // locateFile: function(path, prefix) {
+                        //    if (path.endsWith('.wasm')) {
+                        //        return `${_baseUrl}stockfish/${path}`;
+                        //    }
+                        //    return prefix + path;
+                        // }
+                    };
+                }
                 
                 importScripts(stockfishScriptUrl);
                 // After importScripts, the Stockfish global handlers are available

@@ -81,20 +81,15 @@ class ChessUI {
         const lastMoveArray = gameInstance.chess.history({ verbose: true }).slice(-1)[0]; // More concise
         const lastMoveForGround = lastMoveArray ? [lastMoveArray.from, lastMoveArray.to] : null;
 
-        // Convert Map to plain object for Chessground
-        const destsMap = this.calculateLegalDests(gameInstance);
-        const destsObj = {};
-        for (const [key, value] of destsMap.entries()) {
-            destsObj[key] = value;
-        }
+        const destsMap = this.calculateLegalDests(gameInstance); // This line is fine, it returns a Map
 
         this.ground.set({
             fen: fen,
             turnColor: turn === 'w' ? 'white' : 'black',
             movable: {
-                color: turn === 'w' ? 'white' : 'black', // Player whose turn it is
-                dests: destsObj,
-                free: false, // Always restricted by game rules
+                color: turn === 'w' ? 'white' : 'black',
+                dests: destsMap, // Ensure this is the Map object itself
+                free: false,
                 showDests: true,
             },
             check: gameStatus.isCheck ? this.findKing(gameInstance, turn) : null,
