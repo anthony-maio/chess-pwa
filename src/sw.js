@@ -3,8 +3,7 @@
 // Import the Workbox library for precaching and routing
 import { precacheAndRoute } from 'workbox-precaching';
 
-// self.__WB_MANIFEST is injected by vite-plugin-pwa during the build process
-// It contains the list of all files to precache for offline access.
+ // Precache manifest injected by plugin
 precacheAndRoute(self.__WB_MANIFEST || []);
 
 // Optional: Add other Workbox strategies here, e.g., for runtime caching

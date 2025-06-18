@@ -18,8 +18,12 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: 'auto', 
       strategies: 'injectManifest',
-      src: 'src/sw.js',
-      filename: 'sw.js', // Output service worker file in dist
+      srcDir: 'src',
+      filename: 'sw.js',
+      devOptions: {
+        enabled: true,
+        type: 'module'
+      },
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,wasm,nnue}'],
         maximumFileSizeToCacheInBytes: 45000000
@@ -30,7 +34,7 @@ export default defineConfig({
         description: 'A fully offline-capable chess game that can be installed to your home screen.',
         theme_color: '#3367D6', // Matching existing manifest
         background_color: '#ffffff', // Matching existing manifest
-        start_url: '/',
+        start_url: './',
         display: 'standalone',
         icons: [
           {
