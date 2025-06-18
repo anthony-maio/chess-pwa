@@ -6,7 +6,7 @@ export default defineConfig({
 
   base: '/chess-pwa/',
   root: '.',
-  publicDir: 'public', 
+  publicDir: 'public',
   build: {
     outDir: 'dist', 
   },
