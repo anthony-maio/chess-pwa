@@ -4,20 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Offline Chess PWA</title>
-    <!-- Removed manual manifest link; Vite PWA plugin injects correct manifest.webmanifest -->
+    <!-- Vite PWA plugin will automatically inject the manifest link -->
     <link rel="stylesheet" href="src/styles/main.css">
-    <link rel="icon" href="public/icons/icon-192.png" type="image/png">
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/chess-pwa/sw.js').then(registration => {
-        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-      }, err => {
-        console.log('ServiceWorker registration failed: ', err);
-      });
-    });
-  }
-</script>
+    <link rel="icon" href="icons/icon-192.png" type="image/png">
+    <!-- Service Worker registration is handled automatically by Vite PWA plugin -->
 </head>
 <body class="h-full bg-gray-100 text-gray-800 font-sans flex flex-col">
 
