@@ -52,12 +52,15 @@ console.log('Stockfish worker initialized');
     stockfishWorker.postMessage({ type: 'init', baseUrl: import.meta.env.BASE_URL });
 }
 
-export function requestAIMove(fen, difficulty) { // difficulty: "Easy", "Medium", "Hard"
+export function requestAIMove(fen, difficulty) { 
     if (stockfishWorker) {
         let skillLevel = 1; // Default skill level for Stockfish (0-20)
         let goCommand = 'go depth 5'; // Default UCI go command
 
-        switch (difficulty) {
+        // Normalize difficulty to handle case sensitivity  
+        const normalizedDifficulty = difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
+
+        switch (normalizedDifficulty) {
             case "Easy":
                 skillLevel = 1;
                 goCommand = 'go depth 3 movetime 500';
@@ -70,6 +73,10 @@ export function requestAIMove(fen, difficulty) { // difficulty: "Easy", "Medium"
                 skillLevel = 10; 
                 goCommand = 'go depth 12 movetime 1500';
                 break;
+            case "Expert":
+                skillLevel = 15;
+                goCommand = 'go depth 15 movetime 2000';
+                break;
             default:
                 console.warn(`Unknown difficulty: ${difficulty}, using Easy settings.`);
                 skillLevel = 1;
@@ -81,7 +88,6 @@ export function requestAIMove(fen, difficulty) { // difficulty: "Easy", "Medium"
         stockfishWorker.postMessage({ type: 'go', command: goCommand });
     } else {
         console.error("AI Worker not available to request move.");
-        // Optionally, call onAIMoveCallback with an error or null
         if (onAIMoveCallback) onAIMoveCallback(null, new Error("AI worker not available"));
     }
 }
