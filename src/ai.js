@@ -20,23 +20,19 @@ console.log('Sending init message to worker');
 console.log('Stockfish worker initialized');
 
     stockfishWorker.onmessage = (event) => {
-        const data = event.data;
-        switch (data.type) {
-            case 'ready':
-                if (onAIReadyCallback) onAIReadyCallback(); // No error means success
-                break;
-            case 'bestmove':
-                if (onAIMoveCallback) onAIMoveCallback(data.move);
-                break;
-            case 'error':
-                console.error("AI Worker Error:", data.message);
-                if (onAIReadyCallback) {
-                    // Pass an error object or a flag to indicate failure
-                    onAIReadyCallback(new Error(data.message || "AI initialization failed"));
+        const msg = event.data;
+        if (msg && msg.type === 'ready') {
+            onAIReadyCallback && onAIReadyCallback();
+        } else if (typeof msg === 'string') {
+            if (msg.startsWith('bestmove ')) {
+                const parts = msg.split(' ');
+                if (parts.length >= 2) {
+                    onAIMoveCallback && onAIMoveCallback(parts[1]);
                 }
-                break;
-            default:
-                // console.debug("AI Manager received unhandled message:", data);
+            }
+        } else if (msg && msg.type === 'error') {
+            console.error('AI Worker Error:', msg.message);
+            onAIReadyCallback && onAIReadyCallback(new Error(msg.message || 'AI initialization failed'));
         }
     };
     
@@ -83,9 +79,10 @@ export function requestAIMove(fen, difficulty) {
                 goCommand = 'go depth 3 movetime 500';
         }
         
-        stockfishWorker.postMessage({ type: 'setoption', name: 'Skill Level', value: skillLevel });
-        stockfishWorker.postMessage({ type: 'position', fen: fen });
-        stockfishWorker.postMessage({ type: 'go', command: goCommand });
+        // Send UCI commands as strings
+        stockfishWorker.postMessage(`setoption name Skill Level value ${skillLevel}`);
+        stockfishWorker.postMessage(`position fen ${fen}`);
+        stockfishWorker.postMessage(goCommand);
     } else {
         console.error("AI Worker not available to request move.");
         if (onAIMoveCallback) onAIMoveCallback(null, new Error("AI worker not available"));
