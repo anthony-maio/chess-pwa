@@ -22,7 +22,7 @@ self.onmessage = (event) => {
             break;
         case 'setoption':
             if (self.Stockfish && typeof self.Stockfish === 'function') { 
-                 self.Stockfish().postMessage(`setoption name ${data.name} value ${data.value}`);
+                self.Stockfish().postMessage(`setoption name ${data.name} value ${data.value}`);
             } else {
                 console.warn("Stockfish not yet initialized, skipping setoption command.");
             }
@@ -50,10 +50,10 @@ async function initializeStockfish(baseUrl) {
     self.Module = {
         locateFile: function(path, prefix) {
             if (path.endsWith('.wasm')) {
-                // console.log(`Worker: Locating WASM file: ${path} with baseUrl: ${baseUrl}`);
+                console.log(`Worker: Locating WASM file: ${path} with baseUrl: ${baseUrl}`);
                 return `${baseUrl}stockfish/${path}`;
             }
-            // console.log(`Worker: Locating file: ${path} with prefix: ${prefix}`);
+            console.log(`Worker: Locating file: ${path} with prefix: ${prefix}`);
             return prefix + path;
         },
         onRuntimeInitialized: function() {
@@ -71,13 +71,13 @@ async function initializeStockfish(baseUrl) {
             }, 100); // Increased delay slightly
         },
         print: function(text) {
-            // console.log('Stockfish stdout:', text);
+            console.log('Stockfish stdout:', text);
         },
         printErr: function(text) {
-            // console.error('Stockfish stderr:', text);
+            console.error('Stockfish stderr:', text);
         },
         setStatus: function(text) {
-            // console.log('Stockfish status:', text);
+            console.log('Stockfish status:', text);
         }
     };
 
@@ -86,7 +86,7 @@ async function initializeStockfish(baseUrl) {
             ? `${baseUrl}stockfish/stockfish.wasm.js` 
             : `${baseUrl}stockfish/stockfish.js`;
 
-        console.log(`Worker: Attempting to load ${stockfishJsScript}`);
+        console.log(`Worker: Attempting to load ${stockfishJsScript} WASM: ${wasmSupported}`);
         importScripts(stockfishJsScript); // This will trigger Module.onRuntimeInitialized
 
         // The 'ready' message is now sent from Module.onRuntimeInitialized
