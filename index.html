@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Offline Chess PWA</title>
-    <!-- Vite PWA plugin will automatically inject the manifest link -->
-    <link rel="stylesheet" href="src/styles/main.css">
+    <!-- Vite PWA plugin will automatically inject the manifest link -->
     <link rel="icon" href="icons/icon-192.png" type="image/png">
     <!-- Service Worker registration is handled automatically by Vite PWA plugin -->
-</head>
+  <script type="module" crossorigin src="/chess-pwa/assets/index-CAR1OcSC.js"></script>
+  <link rel="stylesheet" crossorigin href="/chess-pwa/assets/index-BD31YUIm.css">
+<link rel="manifest" href="/chess-pwa/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/chess-pwa/registerSW.js"></script></head>
 <body class="h-full bg-gray-100 text-gray-800 font-sans flex flex-col">
 
     <div id="app-container" class="app-container flex flex-col min-h-screen p-2 sm:p-4">
@@ -70,7 +71,6 @@
         </footer>
 
     </div>
-
-    <script type="module" src="src/main.js"></script>
+
 </body>
 </html>
