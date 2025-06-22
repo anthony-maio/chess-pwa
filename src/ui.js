@@ -170,8 +170,21 @@ class ChessUI {
         console.log(`🎨 UI: Changing theme to: ${themeName}`);
         console.log(`🎨 UI: Board container:`, this.boardContainer);
         
-        const cgWrap = this.boardContainer.querySelector('.cg-wrap');
-        console.log(`🎨 UI: Found cg-wrap:`, cgWrap);
+        // Try different selectors to find the chessground wrapper
+        let cgWrap = this.boardContainer.querySelector('.cg-wrap');
+        if (!cgWrap) {
+            cgWrap = this.boardContainer.querySelector('cg-board');
+        }
+        if (!cgWrap) {
+            cgWrap = this.boardContainer.querySelector('[class*="cg-"]');
+        }
+        if (!cgWrap) {
+            // If still not found, try the board container itself
+            cgWrap = this.boardContainer;
+        }
+        
+        console.log(`🎨 UI: Found target element:`, cgWrap);
+        console.log(`🎨 UI: Element classes:`, cgWrap?.classList?.toString());
         
         if (cgWrap) {
             // Remove existing theme classes
@@ -191,8 +204,8 @@ class ChessUI {
                 this.ground.redrawAll();
             }, 50);
         } else {
-            console.error("❌ Chessground wrapper not found for theme switching.");
-            console.log("🎨 UI: Available elements:", this.boardContainer.children);
+            console.error("❌ No suitable element found for theme switching.");
+            console.log("🎨 UI: Board container HTML:", this.boardContainer.innerHTML);
         }
     }
 
@@ -213,11 +226,11 @@ class ChessUI {
     }
 
     async loadPieceCSS(styleName) {
-        console.log(`Loading piece CSS for: ${styleName}`);
+        console.log(`♟️ Loading piece CSS for: ${styleName}`);
         
         // Remove existing piece style links
         const existingLinks = document.querySelectorAll('link[data-piece-style]');
-        console.log(`Removing ${existingLinks.length} existing piece CSS links`);
+        console.log(`♟️ Removing ${existingLinks.length} existing piece CSS links`);
         existingLinks.forEach(link => link.remove());
         
         // Add new piece style CSS  
@@ -226,10 +239,17 @@ class ChessUI {
         link.href = `${import.meta.env.BASE_URL}piece-css/${styleName}.css`;
         link.setAttribute('data-piece-style', styleName);
         
-        console.log(`Loading CSS from: ${link.href}`);
+        console.log(`♟️ Loading CSS from: ${link.href}`);
+        console.log(`♟️ BASE_URL is: ${import.meta.env.BASE_URL}`);
         
         return new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                console.warn(`⏰ Timeout loading piece CSS: ${styleName}`);
+                resolve(); // Continue even if timeout
+            }, 5000);
+            
             link.onload = () => {
+                clearTimeout(timeout);
                 console.log(`✅ Successfully loaded piece CSS: ${styleName}`);
                 // Force a board redraw
                 setTimeout(() => {
@@ -238,7 +258,9 @@ class ChessUI {
                 resolve();
             };
             link.onerror = () => {
+                clearTimeout(timeout);
                 console.error(`❌ Failed to load piece CSS: ${styleName} from ${link.href}`);
+                console.log(`♟️ Falling back to default pieces`);
                 resolve(); // Don't reject, just continue
             };
             document.head.appendChild(link);
