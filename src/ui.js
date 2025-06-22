@@ -170,17 +170,13 @@ class ChessUI {
         console.log(`🎨 UI: Changing theme to: ${themeName}`);
         console.log(`🎨 UI: Board container:`, this.boardContainer);
         
-        // Try different selectors to find the chessground wrapper
-        let cgWrap = this.boardContainer.querySelector('.cg-wrap');
-        if (!cgWrap) {
-            cgWrap = this.boardContainer.querySelector('cg-board');
-        }
-        if (!cgWrap) {
-            cgWrap = this.boardContainer.querySelector('[class*="cg-"]');
-        }
-        if (!cgWrap) {
-            // If still not found, try the board container itself
-            cgWrap = this.boardContainer;
+        // The theme needs to be applied to the .cg-wrap element (board container)
+        // From the logs, I can see the board container has class "cg-wrap"
+        let cgWrap = this.boardContainer;
+        
+        // Verify it has the cg-wrap class
+        if (!cgWrap.classList.contains('cg-wrap')) {
+            cgWrap = this.boardContainer.querySelector('.cg-wrap');
         }
         
         console.log(`🎨 UI: Found target element:`, cgWrap);
@@ -251,6 +247,16 @@ class ChessUI {
             link.onload = () => {
                 clearTimeout(timeout);
                 console.log(`✅ Successfully loaded piece CSS: ${styleName}`);
+                
+                // Debug: Check what piece elements exist
+                const pieceElements = document.querySelectorAll('piece');
+                console.log(`♟️ Found ${pieceElements.length} piece elements`);
+                if (pieceElements.length > 0) {
+                    const firstPiece = pieceElements[0];
+                    console.log(`♟️ First piece classes:`, firstPiece.className);
+                    console.log(`♟️ First piece HTML:`, firstPiece.outerHTML);
+                }
+                
                 // Force a board redraw
                 setTimeout(() => {
                     this.ground.redrawAll();
