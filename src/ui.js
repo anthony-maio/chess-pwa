@@ -3,11 +3,9 @@ import PieceManager from './pieces.js'; // Import PieceManager
 
 // Import necessary CSS for chessground and pieces
 import './assets/chessground.css';
-import 'chessground/assets/chessground.base.css'; // Base styles and default them
-import 'chessground/assets/chessground.brown.css';  // Blue theme
-import 'chessground/assets/chessground.cburnett.css';  // Blue theme
-// Piece style CSS from public directory cannot be imported directly in JS due to Vite restrictions.
-// Instead, it should be included via a <link> tag in index.html or dynamically loaded.
+import 'chessground/assets/chessground.base.css'; // Base styles
+import 'chessground/assets/chessground.brown.css'; // Brown theme
+import 'chessground/assets/chessground.cburnett.css'; // Cburnett pieces
 
 class ChessUI {
     constructor(boardContainerElement, config = {}) {
@@ -166,30 +164,17 @@ class ChessUI {
 
     // Update board theme (placeholder - requires CSS management)
     setTheme(themeName) {
-        console.log(`UI: Theme selected - ${themeName}. Ensure CSS for this theme is loaded.`);
-        // Example of how one might switch themes if CSS classes are used:
-        // Remove old theme classes from this.boardContainer, add new one.
-        // e.g., this.boardContainer.classList.remove('brown', 'blue');
-        // this.boardContainer.classList.add(themeName);
-        // Chessground itself doesn't have a theme setter; it's CSS-driven.
-        // The boardContainer needs to be styled by chessground.css and theme files.
-        // For example, the 'chessground.brown.css' might apply styles to elements with a 'brown' class.
-        // Or themes might be distinct CSS files that are loaded/unloaded.
-        // A simple approach is to ensure all theme CSS files are imported if small,
-        // and then change a class on a parent element that Chessground's CSS selectors target.
-        // Chessground typically has classes like `cg-wrap.brown` or similar.
-        // We'd need to ensure `boardContainerElement` can have its class changed to affect the theme.
-        // Chessground's DOM structure: boardContainerElement -> cg-wrap -> cg-board
+        console.log(`UI: Theme selected - ${themeName}. Applying theme.`);
+        
         const cgWrap = this.boardContainer.querySelector('.cg-wrap');
         if (cgWrap) {
-            // Remove existing theme classes (brown, blue, etc.)
-            const themes = ['brown']; // Add all supported theme names
+            // Remove existing theme classes
+            const themes = ['brown', 'blue', 'green', 'light', 'dark'];
             themes.forEach(t => cgWrap.classList.remove(t));
+            
             // Add new theme class
             cgWrap.classList.add(themeName);
-
-            // Also ensure the main CSS file (e.g. chessground.css) and the specific theme CSS (e.g. blue.css) are loaded.
-            // For example, if `chessground/dist/theme/blue.css` contains `.cg-wrap.blue { ... }`
+            console.log(`UI: Theme ${themeName} applied to chessboard.`);
         } else {
             console.warn("Chessground wrapper not found for theme switching.");
         }
@@ -197,16 +182,22 @@ class ChessUI {
 
     async setPieceStyle(styleName) {
         console.log(`UI: Attempting to set piece style to: ${styleName}`);
-        const loadedPieces = await this.pieceManager.loadSet(styleName);
-        if (loadedPieces) {
-            // Convert loadedPieces object to Map for Chessground compatibility
-            const piecesMap = new Map(Object.entries(loadedPieces));
-            this.ground.set({
-                pieces: piecesMap
-            });
+        
+        const cgWrap = this.boardContainer.querySelector('.cg-wrap');
+        if (cgWrap) {
+            // Remove existing piece style classes
+            const pieceStyles = ['cburnett', 'merida', 'leipzig', 'alpha'];
+            pieceStyles.forEach(style => cgWrap.classList.remove(style));
+            
+            // Add new piece style class
+            cgWrap.classList.add(styleName);
+            
+            // Store the selection in localStorage via pieceManager
+            await this.pieceManager.loadSet(styleName);
+            
             console.log(`UI: Piece style set to ${styleName}.`);
         } else {
-            console.warn(`UI: Could not load piece style ${styleName}.`);
+            console.warn("Chessground wrapper not found for piece style switching.");
         }
     }
 

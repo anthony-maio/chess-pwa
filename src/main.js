@@ -8,18 +8,44 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Element References ---
     const boardContainer = document.getElementById('board-container');
     const statusBar = document.getElementById('status-bar');
+    const historyContent = document.getElementById('history-content');
     const newGameBtn = document.getElementById('new-game-btn');
     const undoBtn = document.getElementById('undo-btn');
     const flipBoardBtn = document.getElementById('flip-board-btn');
     const themeSelector = document.getElementById('theme-selector');
     const pieceStyleSelector = document.getElementById('piece-style-selector');
     const difficultySelector = document.getElementById('difficulty-selector');
+    const soundCheckbox = document.getElementById('sound-enabled');
 
     // --- AI State Variables ---
     let isAIActive = false; // True when AI is playing
     let currentDifficulty = "Medium"; // Default difficulty
     let playerColor = 'w';    // Player is White, AI is Black
     let aiReady = false;      // True when AI engine has initialized
+
+    // --- Sound Functions ---
+    function playMoveSound() {
+        if (!soundCheckbox || !soundCheckbox.checked) return;
+        
+        // Create a simple beep sound using Web Audio API
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // Higher pitch for move
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        } catch (error) {
+            console.log('Audio not supported:', error);
+        }
+    }
 
     // --- Check for critical DOM elements ---
     if (!boardContainer) {
@@ -46,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (move) {
             ui.updateBoard(game);
+            playMoveSound();
             updateStatus();
             
             const gameStatus = game.getGameStatus();
@@ -105,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const aiMoveResult = game.makeMove({ from, to, promotion });
                 if (aiMoveResult) {
                     ui.updateBoard(game);
+                    playMoveSound();
                 } else {
                     console.error("AI made an invalid move:", move);
                     if (statusBar) statusBar.textContent = "AI error. Please undo or restart.";
@@ -125,48 +153,57 @@ document.addEventListener('DOMContentLoaded', () => {
         let message = '';
 
         if (status.isCheckmate) {
-            message = `Checkmate! ${status.turn === playerColor ? 'AI' : 'Player'} wins.`;
+            message = `🏁 Checkmate! ${status.turn === playerColor ? 'AI' : 'Player'} wins.`;
         } else if (status.isStalemate) {
-            message = 'Stalemate. Game is a draw.';
+            message = '🤝 Stalemate. Game is a draw.';
         } else if (status.isDraw) {
-            message = 'Draw by rule (e.g., 50-move, threefold repetition, or insufficient material).';
+            message = '🤝 Draw by rule (50-move, threefold repetition, or insufficient material).';
         } else {
             if (isAIActive && game.getTurn() !== playerColor && !status.isGameOver && aiReady) {
-                message = 'AI is thinking...';
+                message = '🤖 AI is thinking...';
             } else if (isAIActive && game.getTurn() === playerColor && !status.isGameOver && aiReady) {
-                message = `Player (${playerColor === 'w' ? 'White' : 'Black'}) to move.`;
+                message = `♟️ Player (${playerColor === 'w' ? 'White' : 'Black'}) to move.`;
             } else if (!isAIActive) { // Local two-player game
-                 message = `${status.turn === 'w' ? 'White' : 'Black'} to move.`;
+                 message = `${status.turn === 'w' ? '♗ White' : '♛ Black'} to move.`;
             } else {
-                 message = "Game starting or AI initializing...";
+                 message = "⚡ Game starting or AI initializing...";
             }
             
             if (status.isCheck && ( (isAIActive && game.getTurn() === playerColor) || !isAIActive) ) {
-                message += ' (Check!)'; // Show check only if it's player's turn or local game
+                message += ' ⚠️ Check!'; // Show check only if it's player's turn or local game
             }
         }
-
-        // --- Add Move History ---
-        const history = game.chess.history();
-        let formattedHistory = "";
-        if (history.length > 0) {
-            for (let i = 0; i < history.length; i += 2) {
-                formattedHistory += `${(i / 2) + 1}. ${history[i]}`;
-                if (history[i+1]) {
-                    formattedHistory += ` ${history[i+1]}`;
-                }
-                // Add a space after each pair or single move, trim at the end
-                formattedHistory += " "; 
-            }
-            formattedHistory = formattedHistory.trim();
-            
-            // Append to the status message, perhaps with a clear separator
-            // Using a newline for potential multi-line display in the status bar
-            message += `\nHistory: ${formattedHistory}`;
-        }
-        // --- End Add Move History ---
 
         statusBar.textContent = message;
+        updateMoveHistory();
+    }
+
+    // --- `updateMoveHistory` Function ---
+    function updateMoveHistory() {
+        if (!historyContent) return;
+
+        const history = game.chess.history();
+        if (history.length === 0) {
+            historyContent.textContent = "No moves yet.";
+            return;
+        }
+
+        let formattedHistory = "";
+        for (let i = 0; i < history.length; i += 2) {
+            const moveNum = (i / 2) + 1;
+            const whiteMove = history[i];
+            const blackMove = history[i + 1];
+            
+            formattedHistory += `${moveNum}. ${whiteMove}`;
+            if (blackMove) {
+                formattedHistory += ` ${blackMove}`;
+            }
+            formattedHistory += "\n";
+        }
+        
+        historyContent.textContent = formattedHistory.trim();
+        // Auto-scroll to bottom
+        historyContent.scrollTop = historyContent.scrollHeight;
     }
 
     // --- Event Listeners for UI Controls ---
@@ -279,23 +316,4 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Chess PWA main.js initialized with AI integration attempt.");
     });
 
-    // --- Options Panel Toggle ---
-    const toggleOptionsBtn = document.getElementById('toggle-options-btn');
-    const sideControlsPanel = document.getElementById('side-controls');
-
-    if (toggleOptionsBtn && sideControlsPanel) {
-        // Initial state is visible (no 'hidden' class on panel, aria-expanded="true" on button)
-        // as set in index.html.
-
-        toggleOptionsBtn.addEventListener('click', () => {
-            const isExpanded = toggleOptionsBtn.getAttribute('aria-expanded') === 'true';
-            sideControlsPanel.classList.toggle('hidden');
-            toggleOptionsBtn.setAttribute('aria-expanded', String(!isExpanded));
-            
-            // Optional: Change button text or add visual cues like chevron rotation
-            // For example:
-            // toggleOptionsBtn.textContent = !isExpanded ? 'Hide Options' : 'Show Options Menu';
-        });
-    }
-    // --- End Options Panel Toggle ---
 });

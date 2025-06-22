@@ -35,3 +35,55 @@
 .cg-wrap piece.king.black {
   background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0NSIgaGVpZ2h0PSI0NSI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yMi41IDExLjYzVjYiIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiLz48cGF0aCBkPSJNMjIuNSAyNXM0LjUtNy41IDMtMTAuNWMwIDAtMS0yLjUtMy0yLjVzLTMgMi41LTMgMi41Yy0xLjUgMyAzIDEwLjUgMyAxMC41IiBmaWxsPSIjMDAwIiBzdHJva2UtbGluZWNhcD0iYnV0dCIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIvPjxwYXRoIGQ9Ik0xMS41IDM3YzUuNSAzLjUgMTUuNSAzLjUgMjEgMHYtN3M5LTQuNSA2LTEwLjVjLTQtNi41LTEzLjUtMy41LTE2IDRWMjd2LTMuNWMtMy41LTcuNS0xMy0xMC41LTE2LTQtMyA2IDUgMTAgNSAxMFYzN3oiIGZpbGw9IiMwMDAiLz48cGF0aCBkPSJNMjAgOGg1IiBzdHJva2UtbGluZWpvaW49Im1pdGVyIi8+PHBhdGggZD0iTTMyIDI5LjVzOC41LTQgNi4wMy05LjY1QzM0LjE1IDE0IDI1IDE4IDIyLjUgMjQuNWwuMDEgMi4xLS4wMS0yLjFDMjAgMTggOS45MDYgMTQgNi45OTcgMTkuODVjLTIuNDk3IDUuNjUgNC44NTMgOSA0Ljg1MyA5IiBzdHJva2U9IiNlY2VjZWMiLz48cGF0aCBkPSJNMTEuNSAzMGM1LjUtMyAxNS41LTMgMjEgMG0tMjEgMy41YzUuNS0zIDE1LjUtMyAyMSAwbS0yMSAzLjVjNS41LTMgMTUuNS0zIDIxIDAiIHN0cm9rZT0iI2VjZWNlYyIvPjwvZz48L3N2Zz4=');
 }
+
+/* Theme Styles */
+
+/* Blue Theme */
+.cg-wrap.blue {
+  background: linear-gradient(to bottom, #4a90e2 0%, #357abd 100%);
+}
+.cg-wrap.blue cg-board {
+  background-image: 
+    linear-gradient(45deg, #5ba0f2 25%, transparent 25%),
+    linear-gradient(-45deg, #5ba0f2 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #5ba0f2 75%),
+    linear-gradient(-45deg, transparent 75%, #5ba0f2 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+/* Green Theme */
+.cg-wrap.green {
+  background: linear-gradient(to bottom, #6da854 0%, #4d8332 100%);
+}
+.cg-wrap.green cg-board {
+  background-color: #efefef;
+}
+.cg-wrap.green cg-board square.light {
+  background-color: #efefef;
+}
+.cg-wrap.green cg-board square.dark {
+  background-color: #6da854;
+}
+
+/* Light Theme */
+.cg-wrap.light {
+  background: linear-gradient(to bottom, #f5f5f5 0%, #e8e8e8 100%);
+}
+.cg-wrap.light cg-board square.light {
+  background-color: #f0f0f0;
+}
+.cg-wrap.light cg-board square.dark {
+  background-color: #c0c0c0;
+}
+
+/* Dark Theme */
+.cg-wrap.dark {
+  background: linear-gradient(to bottom, #2c2c2c 0%, #1a1a1a 100%);
+}
+.cg-wrap.dark cg-board square.light {
+  background-color: #404040;
+}
+.cg-wrap.dark cg-board square.dark {
+  background-color: #202020;
+}
