@@ -167,52 +167,78 @@ class ChessUI {
 
     // Update board theme (placeholder - requires CSS management)
     setTheme(themeName) {
-        console.log(`UI: Theme selected - ${themeName}. Applying theme.`);
+        console.log(`🎨 UI: Changing theme to: ${themeName}`);
+        console.log(`🎨 UI: Board container:`, this.boardContainer);
         
         const cgWrap = this.boardContainer.querySelector('.cg-wrap');
+        console.log(`🎨 UI: Found cg-wrap:`, cgWrap);
+        
         if (cgWrap) {
             // Remove existing theme classes
             const themes = ['brown', 'blue', 'green', 'light', 'dark'];
+            console.log(`🎨 UI: Before removing - classes: ${cgWrap.classList.toString()}`);
             themes.forEach(t => cgWrap.classList.remove(t));
+            console.log(`🎨 UI: After removing - classes: ${cgWrap.classList.toString()}`);
             
             // Add new theme class
             cgWrap.classList.add(themeName);
-            console.log(`UI: Theme ${themeName} applied to chessboard.`);
+            console.log(`✅ UI: Theme ${themeName} applied to chessboard.`);
+            console.log(`🎨 UI: Final classes: ${cgWrap.classList.toString()}`);
+            
+            // Force a redraw
+            setTimeout(() => {
+                console.log(`🎨 UI: Forcing redraw for theme ${themeName}`);
+                this.ground.redrawAll();
+            }, 50);
         } else {
-            console.warn("Chessground wrapper not found for theme switching.");
+            console.error("❌ Chessground wrapper not found for theme switching.");
+            console.log("🎨 UI: Available elements:", this.boardContainer.children);
         }
     }
 
     async setPieceStyle(styleName) {
-        console.log(`UI: Attempting to set piece style to: ${styleName}`);
+        console.log(`♟️ UI: Attempting to set piece style to: ${styleName}`);
         
-        // Dynamically load the CSS file for the piece style
-        await this.loadPieceCSS(styleName);
-        
-        // Store the selection in localStorage via pieceManager
-        await this.pieceManager.loadSet(styleName);
-        
-        console.log(`UI: Piece style set to ${styleName}.`);
+        try {
+            // Dynamically load the CSS file for the piece style
+            await this.loadPieceCSS(styleName);
+            
+            // Store the selection in localStorage via pieceManager
+            await this.pieceManager.loadSet(styleName);
+            
+            console.log(`✅ UI: Piece style successfully set to ${styleName}.`);
+        } catch (error) {
+            console.error(`❌ UI: Error setting piece style to ${styleName}:`, error);
+        }
     }
 
     async loadPieceCSS(styleName) {
+        console.log(`Loading piece CSS for: ${styleName}`);
+        
         // Remove existing piece style links
         const existingLinks = document.querySelectorAll('link[data-piece-style]');
+        console.log(`Removing ${existingLinks.length} existing piece CSS links`);
         existingLinks.forEach(link => link.remove());
         
-        // Add new piece style CSS
+        // Add new piece style CSS  
         const link = document.createElement('link');
         link.rel = 'stylesheet';
-        link.href = `/piece-css/${styleName}.css`;
+        link.href = `${import.meta.env.BASE_URL}piece-css/${styleName}.css`;
         link.setAttribute('data-piece-style', styleName);
+        
+        console.log(`Loading CSS from: ${link.href}`);
         
         return new Promise((resolve, reject) => {
             link.onload = () => {
-                console.log(`Loaded piece CSS: ${styleName}`);
+                console.log(`✅ Successfully loaded piece CSS: ${styleName}`);
+                // Force a board redraw
+                setTimeout(() => {
+                    this.ground.redrawAll();
+                }, 100);
                 resolve();
             };
             link.onerror = () => {
-                console.warn(`Failed to load piece CSS: ${styleName}`);
+                console.error(`❌ Failed to load piece CSS: ${styleName} from ${link.href}`);
                 resolve(); // Don't reject, just continue
             };
             document.head.appendChild(link);

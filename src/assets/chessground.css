@@ -70,3 +70,9 @@
 .cg-wrap square.dark {
   background-color: var(--square-dark, #b58863) !important;
 }
+
+/* Brown Theme (Default) */
+.cg-wrap.brown {
+  --square-light: #f0d9b5;
+  --square-dark: #b58863;
+}

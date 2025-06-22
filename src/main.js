@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pieceStyleSelector = document.getElementById('piece-style-selector');
     const difficultySelector = document.getElementById('difficulty-selector');
     const soundCheckbox = document.getElementById('sound-enabled');
+    const testSoundBtn = document.getElementById('test-sound-btn');
 
     // --- AI State Variables ---
     let isAIActive = false; // True when AI is playing
@@ -24,12 +25,35 @@ document.addEventListener('DOMContentLoaded', () => {
     let aiReady = false;      // True when AI engine has initialized
 
     // --- Sound Functions ---
+    let audioContext = null;
+    let soundInitialized = false;
+
+    function initializeAudio() {
+        if (soundInitialized) return true;
+        
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            soundInitialized = true;
+            console.log('🔊 Audio context initialized');
+            return true;
+        } catch (error) {
+            console.log('❌ Audio not supported:', error);
+            return false;
+        }
+    }
+
     function playMoveSound() {
         if (!soundCheckbox || !soundCheckbox.checked) return;
         
-        // Create a simple beep sound using Web Audio API
+        // Initialize audio on first use (requires user interaction)
+        if (!soundInitialized && !initializeAudio()) return;
+        
         try {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            // Resume audio context if it's suspended (required by some browsers)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             
@@ -37,13 +61,48 @@ document.addEventListener('DOMContentLoaded', () => {
             gainNode.connect(audioContext.destination);
             
             oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // Higher pitch for move
-            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
             
             oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.1);
+            oscillator.stop(audioContext.currentTime + 0.15);
+            
+            console.log('🔊 Move sound played');
         } catch (error) {
-            console.log('Audio not supported:', error);
+            console.log('❌ Error playing sound:', error);
+        }
+    }
+
+    // Test sound function for the checkbox
+    function testSound() {
+        if (!soundCheckbox || !soundCheckbox.checked) return;
+        
+        if (!soundInitialized && !initializeAudio()) {
+            alert('Audio not supported on this device');
+            return;
+        }
+        
+        try {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+            
+            console.log('🔊 Test sound played');
+        } catch (error) {
+            console.log('❌ Error playing test sound:', error);
         }
     }
 
@@ -275,32 +334,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (themeSelector) {
         themeSelector.addEventListener('change', (event) => {
-            ui.setTheme(event.target.value);
-            console.log("Theme changed to:", event.target.value);
+            const selectedTheme = event.target.value;
+            console.log("🎨 Theme changed to:", selectedTheme);
+            
+            ui.setTheme(selectedTheme);
+            
+            // Show visual feedback
+            if (statusBar) {
+                statusBar.textContent = `🎨 Theme changed to ${selectedTheme.charAt(0).toUpperCase() + selectedTheme.slice(1)}`;
+                setTimeout(() => {
+                    updateStatus();
+                }, 2000);
+            }
+            
+            // Add visual indication to the dropdown
+            themeSelector.style.background = '#f0f8e8';
+            setTimeout(() => {
+                themeSelector.style.background = '';
+            }, 1000);
         });
     }
 
     if (pieceStyleSelector) {
         pieceStyleSelector.addEventListener('change', async (event) => {
-            await ui.setPieceStyle(event.target.value);
-            console.log("Piece style changed to:", event.target.value);
+            const selectedStyle = event.target.value;
+            console.log("♟️ Piece style changed to:", selectedStyle);
+            
+            // Show loading feedback
+            if (statusBar) {
+                statusBar.textContent = `♟️ Loading ${selectedStyle} pieces...`;
+            }
+            
+            await ui.setPieceStyle(selectedStyle);
             ui.updateBoard(game); // Re-render board with new pieces
-            updateStatus();
+            
+            // Show completion feedback
+            if (statusBar) {
+                statusBar.textContent = `♟️ Pieces changed to ${selectedStyle.charAt(0).toUpperCase() + selectedStyle.slice(1)}`;
+                setTimeout(() => {
+                    updateStatus();
+                }, 2000);
+            }
+            
+            // Add visual indication to the dropdown
+            pieceStyleSelector.style.background = '#fff0e6';
+            setTimeout(() => {
+                pieceStyleSelector.style.background = '';
+            }, 1000);
         });
     }
 
     if (difficultySelector) {
         // Initialize currentDifficulty from selector's default value if not already done
-        currentDifficulty = difficultySelector.value || "Medium";
+        currentDifficulty = difficultySelector.value || "medium";
+        console.log(`Initial difficulty set to: ${currentDifficulty}`);
 
         difficultySelector.addEventListener('change', (event) => {
             currentDifficulty = event.target.value;
-            console.log("Difficulty changed to:", currentDifficulty);
-            if (aiReady && isAIActive && statusBar) {
-                statusBar.textContent = `Difficulty set to ${currentDifficulty}.`;
+            console.log("🎯 Difficulty changed to:", currentDifficulty);
+            
+            // Show visual feedback immediately
+            if (statusBar) {
+                const difficultyNames = {
+                    'easy': 'Easy (Level 1)',
+                    'medium': 'Medium (Level 5)', 
+                    'hard': 'Hard (Level 10)',
+                    'expert': 'Expert (Level 15)'
+                };
+                statusBar.textContent = `🎯 Difficulty set to ${difficultyNames[currentDifficulty] || currentDifficulty}`;
+                
+                // Show visual indicator for 3 seconds, then return to normal status
+                setTimeout(() => {
+                    updateStatus();
+                }, 3000);
             }
-            // The difficulty is used in the next call to ai.requestAIMove().
-            // No need to explicitly send to AI unless AI module supports dynamic skill updates mid-calculation.
+            
+            // Add visual indication to the dropdown itself
+            difficultySelector.style.background = '#e6f3ff';
+            setTimeout(() => {
+                difficultySelector.style.background = '';
+            }, 1000);
+        });
+    }
+
+    // --- Test Sound Button Event Listener ---
+    if (testSoundBtn) {
+        testSoundBtn.addEventListener('click', () => {
+            console.log('🔔 Test sound button clicked');
+            testSound();
         });
     }
 
