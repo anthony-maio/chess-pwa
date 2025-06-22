@@ -51,7 +51,10 @@ async function initializeStockfish(baseUrl) {
         locateFile: function(path, prefix) {
             if (path.endsWith('.wasm')) {
                 console.log(`Worker: Locating WASM file: ${path} with baseUrl: ${baseUrl}`);
-                return `${baseUrl}stockfish/${path}`;
+                // Ensure we have the correct base path for GitHub Pages
+                const fullPath = `${baseUrl}stockfish/${path}`;
+                console.log(`Worker: Full WASM path: ${fullPath}`);
+                return fullPath;
             }
             console.log(`Worker: Locating file: ${path} with prefix: ${prefix}`);
             return prefix + path;
@@ -65,8 +68,8 @@ async function initializeStockfish(baseUrl) {
                     console.log('Stockfish function is available. Posting ready message.');
                     self.postMessage({ type: 'ready' });
                 } else {
-                    console.error('Stockfish function not available after runtime initialization.');
-                    self.postMessage({ type: 'error', message: 'Stockfish function not available after runtime initialization' });
+                    console.error('Stockfish function not available after initialization');
+                    throw new Error('Stockfish function not available after initialization');
                 }
             }, 100); // Increased delay slightly
         },
@@ -87,6 +90,14 @@ async function initializeStockfish(baseUrl) {
             : `${baseUrl}stockfish/stockfish.js`;
 
         console.log(`Worker: Attempting to load ${stockfishJsScript} WASM: ${wasmSupported}`);
+        console.log(`Worker: baseUrl is: "${baseUrl}"`);
+        
+        // Test if the script URL is accessible before importing
+        const testResponse = await fetch(stockfishJsScript);
+        if (!testResponse.ok) {
+            throw new Error(`Failed to fetch Stockfish script: ${testResponse.status} ${testResponse.statusText} for URL: ${stockfishJsScript}`);
+        }
+        
         importScripts(stockfishJsScript); // This will trigger Module.onRuntimeInitialized
 
         // The 'ready' message is now sent from Module.onRuntimeInitialized

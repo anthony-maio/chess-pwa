@@ -45,7 +45,9 @@ console.log('Stockfish worker initialized');
     };
 
     // Pass the base URL from Vite's import.meta.env.BASE_URL to the worker
-    stockfishWorker.postMessage({ type: 'init', baseUrl: import.meta.env.BASE_URL });
+    const baseUrl = import.meta.env.BASE_URL;
+    console.log('AI: Sending baseUrl to worker:', baseUrl);
+    stockfishWorker.postMessage({ type: 'init', baseUrl: baseUrl });
 }
 
 export function requestAIMove(fen, difficulty) { 

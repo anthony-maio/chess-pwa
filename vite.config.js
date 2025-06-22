@@ -8,6 +8,17 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        assetFileNames: (assetInfo) => {
+          // Keep WASM files in their original structure
+          if (assetInfo.name && assetInfo.name.endsWith('.wasm')) {
+            return 'stockfish/[name][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        }
+      }
+    }
   },
   optimizeDeps: {
     exclude: ["@undecaf/zbar-wasm"]
