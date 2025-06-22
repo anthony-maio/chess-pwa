@@ -81,10 +81,10 @@ export function requestAIMove(fen, difficulty) {
                 goCommand = 'go depth 3 movetime 500';
         }
         
-        // Send UCI commands as strings
-        stockfishWorker.postMessage(`setoption name Skill Level value ${skillLevel}`);
-        stockfishWorker.postMessage(`position fen ${fen}`);
-        stockfishWorker.postMessage(goCommand);
+        // Send UCI commands as structured messages
+        stockfishWorker.postMessage({ type: 'setoption', name: 'Skill Level', value: skillLevel });
+        stockfishWorker.postMessage({ type: 'position', fen: fen });
+        stockfishWorker.postMessage({ type: 'go', command: goCommand });
     } else {
         console.error("AI Worker not available to request move.");
         if (onAIMoveCallback) onAIMoveCallback(null, new Error("AI worker not available"));

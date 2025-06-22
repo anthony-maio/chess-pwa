@@ -5,11 +5,19 @@ console.log('Stockfish worker script loaded');
 var wasmSupported = typeof WebAssembly === 'object' && WebAssembly.validate(Uint8Array.of(0x0,0x61,0x73,0x6d,0x01,0x00,0x00,0x00));
 
 let _baseUrl = '/'; // Default to root, will be updated by init message
+let stockfishWorker = null;
 
 // Handle messages from the main thread
 self.onmessage = (event) => {
     const data = event.data;
-    // console.log('Worker received message:', data); // Less verbose logging
+    
+    if (typeof data === 'string') {
+        // Direct UCI command string, pass to Stockfish worker
+        if (stockfishWorker) {
+            stockfishWorker.postMessage(data);
+        }
+        return;
+    }
     
     switch (data.type) {
         case 'init':
@@ -21,24 +29,23 @@ self.onmessage = (event) => {
             initializeStockfish(_baseUrl);
             break;
         case 'setoption':
-            if (self.Stockfish && typeof self.Stockfish === 'function') { 
-                self.Stockfish().postMessage(`setoption name ${data.name} value ${data.value}`);
-            } else {
-                console.warn("Stockfish not yet initialized, skipping setoption command.");
+            if (stockfishWorker) {
+                const command = `setoption name ${data.name} value ${data.value}`;
+                console.log(`Worker: Sending command: ${command}`);
+                stockfishWorker.postMessage(command);
             }
             break;
         case 'position':
-            if (self.Stockfish && typeof self.Stockfish === 'function') {
-                self.Stockfish().postMessage(`position fen ${data.fen}`);
-            } else {
-                console.warn("Stockfish not yet initialized, skipping position command.");
+            if (stockfishWorker) {
+                const command = `position fen ${data.fen}`;
+                console.log(`Worker: Sending command: ${command}`);
+                stockfishWorker.postMessage(command);
             }
             break;
         case 'go':
-            if (self.Stockfish && typeof self.Stockfish === 'function') {
-                self.Stockfish().postMessage(data.command);
-            } else {
-                console.warn("Stockfish not yet initialized, skipping go command.");
+            if (stockfishWorker) {
+                console.log(`Worker: Sending command: ${data.command}`);
+                stockfishWorker.postMessage(data.command);
             }
             break;
         default:
@@ -47,63 +54,42 @@ self.onmessage = (event) => {
 };
 
 async function initializeStockfish(baseUrl) {
-    self.Module = {
-        locateFile: function(path, prefix) {
-            if (path.endsWith('.wasm')) {
-                console.log(`Worker: Locating WASM file: ${path} with baseUrl: ${baseUrl}`);
-                // Ensure we have the correct base path for GitHub Pages
-                const fullPath = `${baseUrl}stockfish/${path}`;
-                console.log(`Worker: Full WASM path: ${fullPath}`);
-                return fullPath;
-            }
-            console.log(`Worker: Locating file: ${path} with prefix: ${prefix}`);
-            return prefix + path;
-        },
-        onRuntimeInitialized: function() {
-            console.log('Stockfish runtime initialized.');
-            // Check for Stockfish function availability after a short delay
-            // to ensure all scripts are fully processed.
-            setTimeout(() => {
-                if (self.Stockfish && typeof self.Stockfish === 'function') {
-                    console.log('Stockfish function is available. Posting ready message.');
-                    self.postMessage({ type: 'ready' });
-                } else {
-                    console.error('Stockfish function not available after initialization');
-                    throw new Error('Stockfish function not available after initialization');
-                }
-            }, 100); // Increased delay slightly
-        },
-        print: function(text) {
-            console.log('Stockfish stdout:', text);
-        },
-        printErr: function(text) {
-            console.error('Stockfish stderr:', text);
-        },
-        setStatus: function(text) {
-            console.log('Stockfish status:', text);
-        }
-    };
-
     try {
         const stockfishJsScript = wasmSupported 
             ? `${baseUrl}stockfish/stockfish.wasm.js` 
             : `${baseUrl}stockfish/stockfish.js`;
 
-        console.log(`Worker: Attempting to load ${stockfishJsScript} WASM: ${wasmSupported}`);
-        console.log(`Worker: baseUrl is: "${baseUrl}"`);
+        console.log(`Worker: Creating Stockfish worker with script: ${stockfishJsScript}`);
         
-        // Test if the script URL is accessible before importing
+        // Test if the script URL is accessible before creating worker
         const testResponse = await fetch(stockfishJsScript);
         if (!testResponse.ok) {
             throw new Error(`Failed to fetch Stockfish script: ${testResponse.status} ${testResponse.statusText} for URL: ${stockfishJsScript}`);
         }
         
-        importScripts(stockfishJsScript); // This will trigger Module.onRuntimeInitialized
-
-        // The 'ready' message is now sent from Module.onRuntimeInitialized
+        // Create the actual Stockfish worker
+        stockfishWorker = new Worker(stockfishJsScript);
+        
+        // Set up message handling from Stockfish worker
+        stockfishWorker.onmessage = function(event) {
+            console.log('Stockfish output:', event.data);
+            // Relay all Stockfish output to the main thread
+            self.postMessage(event.data);
+        };
+        
+        stockfishWorker.onerror = function(error) {
+            console.error('Stockfish worker error:', error);
+            self.postMessage({ type: 'error', message: `Stockfish worker error: ${error.message}` });
+        };
+        
+        // Initialize Stockfish UCI
+        stockfishWorker.postMessage('uci');
+        
+        console.log('Stockfish worker created successfully');
+        self.postMessage({ type: 'ready' });
         
     } catch (error) {
-        console.error("Worker: Error during Stockfish script import or initialization.", error);
+        console.error("Worker: Error during Stockfish worker creation.", error);
         self.postMessage({ type: 'error', message: `Failed to initialize Stockfish: ${error.message}` });
     }
 }
