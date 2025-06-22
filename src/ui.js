@@ -44,6 +44,9 @@ class ChessUI {
             // Piece set will be loaded dynamically by PieceManager
         });
 
+        // Ensure the board has the is2d class for CSS-based pieces
+        boardContainerElement.classList.add('is2d');
+
         this.loadInitialPieceSet(); // Load the piece set saved in local storage or default
     }
 
@@ -183,22 +186,37 @@ class ChessUI {
     async setPieceStyle(styleName) {
         console.log(`UI: Attempting to set piece style to: ${styleName}`);
         
-        const cgWrap = this.boardContainer.querySelector('.cg-wrap');
-        if (cgWrap) {
-            // Remove existing piece style classes
-            const pieceStyles = ['cburnett', 'merida', 'leipzig', 'alpha'];
-            pieceStyles.forEach(style => cgWrap.classList.remove(style));
-            
-            // Add new piece style class
-            cgWrap.classList.add(styleName);
-            
-            // Store the selection in localStorage via pieceManager
-            await this.pieceManager.loadSet(styleName);
-            
-            console.log(`UI: Piece style set to ${styleName}.`);
-        } else {
-            console.warn("Chessground wrapper not found for piece style switching.");
-        }
+        // Dynamically load the CSS file for the piece style
+        await this.loadPieceCSS(styleName);
+        
+        // Store the selection in localStorage via pieceManager
+        await this.pieceManager.loadSet(styleName);
+        
+        console.log(`UI: Piece style set to ${styleName}.`);
+    }
+
+    async loadPieceCSS(styleName) {
+        // Remove existing piece style links
+        const existingLinks = document.querySelectorAll('link[data-piece-style]');
+        existingLinks.forEach(link => link.remove());
+        
+        // Add new piece style CSS
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = `/piece-css/${styleName}.css`;
+        link.setAttribute('data-piece-style', styleName);
+        
+        return new Promise((resolve, reject) => {
+            link.onload = () => {
+                console.log(`Loaded piece CSS: ${styleName}`);
+                resolve();
+            };
+            link.onerror = () => {
+                console.warn(`Failed to load piece CSS: ${styleName}`);
+                resolve(); // Don't reject, just continue
+            };
+            document.head.appendChild(link);
+        });
     }
 
     async loadInitialPieceSet() {
