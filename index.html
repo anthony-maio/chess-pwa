@@ -7,67 +7,81 @@
     <!-- Vite PWA plugin will automatically inject the manifest link -->
     <link rel="icon" href="icons/icon-192.png" type="image/png">
     <!-- Service Worker registration is handled automatically by Vite PWA plugin -->
-  <script type="module" crossorigin src="/chess-pwa/assets/index-DxcXN3JW.js"></script>
-  <link rel="stylesheet" crossorigin href="/chess-pwa/assets/index-BD31YUIm.css">
+  <script type="module" crossorigin src="/chess-pwa/assets/index-dZmucchp.js"></script>
+  <link rel="stylesheet" crossorigin href="/chess-pwa/assets/index-BhImpOCi.css">
 <link rel="manifest" href="/chess-pwa/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/chess-pwa/registerSW.js"></script></head>
 <body class="h-full bg-gray-100 text-gray-800 font-sans flex flex-col">
 
     <div id="app-container" class="app-container flex flex-col min-h-screen p-2 sm:p-4">
 
         <header class="top-controls bg-gray-200 p-2 sm:p-3 rounded-md shadow mb-2 sm:mb-4">
-            <div class="flex justify-center sm:justify-start space-x-2 sm:space-x-3">
-                <button id="new-game-btn" class="px-3 sm:px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">New Game</button>
-                <button id="undo-btn" class="px-3 sm:px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75">Undo</button>
-                <button id="flip-board-btn" class="px-3 sm:px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75">Flip Board</button>
+            <div class="flex flex-wrap gap-2 sm:gap-3 justify-center">
+                <!-- Game Control Buttons -->
+                <div class="flex space-x-2">
+                    <button id="new-game-btn" class="px-3 sm:px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">New Game</button>
+                    <button id="undo-btn" class="px-3 sm:px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75">Undo</button>
+                    <button id="flip-board-btn" class="px-3 sm:px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75">Flip Board</button>
+                </div>
+                
+                <!-- Settings Controls -->
+                <div class="flex flex-wrap gap-2 items-center">
+                    <div class="flex items-center space-x-1">
+                        <label for="difficulty-selector" class="text-xs font-medium text-gray-700">Difficulty:</label>
+                        <select id="difficulty-selector" class="text-xs p-1 border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-center space-x-1">
+                        <label for="theme-selector" class="text-xs font-medium text-gray-700">Theme:</label>
+                        <select id="theme-selector" class="text-xs p-1 border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="brown" selected>Brown</option>
+                            <option value="blue">Blue</option>
+                            <option value="green">Green</option>
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-center space-x-1">
+                        <label for="piece-style-selector" class="text-xs font-medium text-gray-700">Pieces:</label>
+                        <select id="piece-style-selector" class="text-xs p-1 border border-gray-300 rounded focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="cburnett" selected>Cburnett</option>
+                            <option value="merida">Merida</option>
+                            <option value="leipzig">Leipzig</option>
+                            <option value="alpha">Alpha</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-center space-x-1">
+                        <input type="checkbox" id="sound-enabled" class="text-xs rounded border-gray-300 focus:ring-indigo-500 focus:border-indigo-500" checked>
+                        <label for="sound-enabled" class="text-xs font-medium text-gray-700">🔊 Sound</label>
+                    </div>
+                </div>
             </div>
         </header>
 
-        <main class="main-content flex flex-col md:flex-row flex-grow gap-2 sm:gap-4">
-            
-            <div id="board-area" class="flex-grow md:w-2/3 flex justify-center items-center">
-                <div id="board-container" class="board-container w-full max-w-md sm:max-w-lg md:max-w-xl aspect-square bg-white shadow-lg rounded-md border border-gray-300">
+        <main class="main-content flex flex-col flex-grow">
+            <div id="board-area" class="flex-grow flex justify-center items-center p-2">
+                <div id="board-container" class="board-container w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl aspect-square bg-white shadow-lg rounded-md border border-gray-300">
                     <!-- Chessboard will be rendered here by Chessground -->
-                    <p class="text-center p-4 text-gray-500">Chessboard Area</p>
                 </div>
             </div>
-
-            <button id="toggle-options-btn" aria-expanded="true" aria-controls="side-controls" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-md text-sm font-medium mb-2 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                Options Menu
-            </button>
-            <aside id="side-controls" class="side-controls md:w-1/3 bg-gray-200 p-3 sm:p-4 rounded-md shadow space-y-3 sm:space-y-4">
-                <div>
-                    <label for="theme-selector" class="block text-sm font-medium text-gray-700 mb-1">Theme:</label>
-                    <select id="theme-selector" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="blue">Blue</option>
-                        <option value="brown">Brown</option>
-                        <option value="green">Green</option>
-                        <option value="light">Light</option>
-                        <option value="dark">Dark</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="piece-style-selector" class="block text-sm font-medium text-gray-700 mb-1">Piece Style:</label>
-                    <select id="piece-style-selector" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="cburnett">Cburnett</option>
-                        <option value="merida">Merida</option>
-                        <option value="leipzig">Leipzig</option>
-                        <option value="alpha">Alpha</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="difficulty-selector" class="block text-sm font-medium text-gray-700 mb-1">Difficulty:</label>
-                    <select id="difficulty-selector" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="easy">Easy (Stockfish Level 5)</option>
-                        <option value="medium">Medium (Stockfish Level 10)</option>
-                        <option value="hard">Hard (Stockfish Level 15)</option>
-                        <option value="expert">Expert (Stockfish Level 20)</option>
-                    </select>
-                </div>
-            </aside>
         </main>
 
-        <footer id="status-bar" class="status-bar bg-gray-200 p-3 mt-2 sm:mt-4 rounded-md shadow text-left text-sm text-gray-700 h-24 overflow-y-auto" role="status" aria-live="polite">
-            Game status and move history will appear here.
+        <footer class="status-footer mt-2 sm:mt-4 space-y-2">
+            <div id="status-bar" class="status-bar bg-gray-200 p-3 rounded-md shadow text-center text-sm text-gray-700" role="status" aria-live="polite">
+                Game status will appear here.
+            </div>
+            <div id="move-history" class="move-history bg-gray-100 p-3 rounded-md shadow">
+                <h4 class="text-xs font-semibold text-gray-600 mb-2">Move History</h4>
+                <div id="history-content" class="text-xs text-gray-700 max-h-20 overflow-y-auto font-mono leading-relaxed">
+                    Game moves will appear here.
+                </div>
+            </div>
         </footer>
 
     </div>
