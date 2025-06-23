@@ -17,6 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const difficultySelector = document.getElementById('difficulty-selector');
     const soundCheckbox = document.getElementById('sound-enabled');
     const testSoundBtn = document.getElementById('test-sound-btn');
+    
+    // Promotion modal elements
+    const promotionModal = document.getElementById('promotion-modal');
+    const promoteQueenBtn = document.getElementById('promote-queen');
+    const promoteRookBtn = document.getElementById('promote-rook');
+    const promoteBishopBtn = document.getElementById('promote-bishop');
+    const promoteKnightBtn = document.getElementById('promote-knight');
 
     // --- AI State Variables ---
     let isAIActive = false; // True when AI is playing
@@ -120,11 +127,76 @@ document.addEventListener('DOMContentLoaded', () => {
         currentDifficulty = difficultySelector.value || "Medium"; // Initialize from selector
     }
 
+    // --- Promotion handling variables ---
+    let pendingMove = null; // Store move awaiting promotion choice
+
+    // --- Helper function to check if move is a pawn promotion ---
+    const isPromotion = (from, to) => {
+        const piece = game.getPiece(from);
+        if (!piece || piece.type !== 'p') return false;
+        
+        const toRank = parseInt(to[1]);
+        return (piece.color === 'w' && toRank === 8) || (piece.color === 'b' && toRank === 1);
+    };
+
+    // --- Show promotion modal ---
+    const showPromotionModal = (from, to) => {
+        pendingMove = { from, to };
+        promotionModal.classList.remove('hidden');
+        ui.ground.set({ viewOnly: true }); // Disable board interaction
+    };
+
+    // --- Hide promotion modal ---
+    const hidePromotionModal = () => {
+        promotionModal.classList.add('hidden');
+        pendingMove = null;
+        ui.ground.set({ viewOnly: false }); // Re-enable board interaction
+    };
+
+    // --- Execute move with promotion ---
+    const executeMoveWithPromotion = (promotion) => {
+        if (!pendingMove) return;
+        
+        const move = game.makeMove({ 
+            from: pendingMove.from, 
+            to: pendingMove.to, 
+            promotion: promotion 
+        });
+        
+        if (move) {
+            ui.updateBoard(game);
+            playMoveSound();
+            updateStatus();
+            
+            const gameStatus = game.getGameStatus();
+            if (isAIActive && !gameStatus.isGameOver && game.getTurn() !== playerColor && aiReady) {
+                statusBar.textContent = "AI is thinking...";
+                ui.ground.set({ viewOnly: true }); 
+
+                setTimeout(() => {
+                    ai.requestAIMove(game.getFen(), currentDifficulty);
+                }, 500);
+            } else if (gameStatus.isGameOver) {
+                updateStatus();
+            }
+        } else {
+            console.warn("Invalid promotion move:", pendingMove, "with promotion:", promotion);
+        }
+        
+        hidePromotionModal();
+    };
+
     // --- `handleUserMove` Function ---
     const handleUserMove = (from, to) => {
         if (game.getTurn() !== playerColor && isAIActive) {
             console.log("Not player's turn or AI is active and it's AI's turn.");
             return; // Prevent moves if it's not the player's turn (e.g. AI is thinking)
+        }
+
+        // Check if this is a pawn promotion
+        if (isPromotion(from, to)) {
+            showPromotionModal(from, to);
+            return;
         }
 
         const move = game.makeMove({ from, to });
@@ -423,6 +495,20 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('🔔 Test sound button clicked');
             testSound();
         });
+    }
+
+    // --- Promotion Button Event Listeners ---
+    if (promoteQueenBtn) {
+        promoteQueenBtn.addEventListener('click', () => executeMoveWithPromotion('q'));
+    }
+    if (promoteRookBtn) {
+        promoteRookBtn.addEventListener('click', () => executeMoveWithPromotion('r'));
+    }
+    if (promoteBishopBtn) {
+        promoteBishopBtn.addEventListener('click', () => executeMoveWithPromotion('b'));
+    }
+    if (promoteKnightBtn) {
+        promoteKnightBtn.addEventListener('click', () => executeMoveWithPromotion('n'));
     }
 
     // --- Initial Setup ---

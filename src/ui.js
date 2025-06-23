@@ -46,6 +46,11 @@ class ChessUI {
 
         // Ensure the board has the is2d class for CSS-based pieces
         boardContainerElement.classList.add('is2d');
+        
+        // Also ensure it has cg-wrap class (should already be added by chessground)
+        if (!boardContainerElement.classList.contains('cg-wrap')) {
+            boardContainerElement.classList.add('cg-wrap');
+        }
 
         this.loadInitialPieceSet(); // Load the piece set saved in local storage or default
     }
@@ -225,7 +230,7 @@ class ChessUI {
         console.log(`♟️ Loading piece CSS for: ${styleName}`);
         
         // Remove existing piece style links
-        const existingLinks = document.querySelectorAll('link[data-piece-style]');
+        const existingLinks = document.querySelectorAll('link[data-piece-style], style[data-piece-style]');
         console.log(`♟️ Removing ${existingLinks.length} existing piece CSS links`);
         existingLinks.forEach(link => link.remove());
         
@@ -241,12 +246,16 @@ class ChessUI {
         return new Promise((resolve, reject) => {
             const timeout = setTimeout(() => {
                 console.warn(`⏰ Timeout loading piece CSS: ${styleName}`);
+                this.addPieceCSSBridge(styleName); // Add CSS bridge on timeout
                 resolve(); // Continue even if timeout
             }, 5000);
             
             link.onload = () => {
                 clearTimeout(timeout);
                 console.log(`✅ Successfully loaded piece CSS: ${styleName}`);
+                
+                // Add CSS bridge to map chessground selectors to piece set selectors
+                this.addPieceCSSBridge(styleName);
                 
                 // Debug: Check what piece elements exist
                 const pieceElements = document.querySelectorAll('piece');
@@ -267,10 +276,63 @@ class ChessUI {
                 clearTimeout(timeout);
                 console.error(`❌ Failed to load piece CSS: ${styleName} from ${link.href}`);
                 console.log(`♟️ Falling back to default pieces`);
+                this.addPieceCSSBridge(styleName); // Add CSS bridge on error too
                 resolve(); // Don't reject, just continue
             };
             document.head.appendChild(link);
         });
+    }
+
+    addPieceCSSBridge(styleName) {
+        // The piece CSS files use .is2d selectors, but we need .cg-wrap selectors
+        // We'll fetch the loaded CSS and rewrite the selectors
+        
+        setTimeout(() => {
+            // Get all stylesheets
+            const stylesheets = Array.from(document.styleSheets);
+            const pieceStylesheet = stylesheets.find(sheet => {
+                try {
+                    return sheet.href && sheet.href.includes(`piece-css/${styleName}.css`);
+                } catch (e) {
+                    return false;
+                }
+            });
+            
+            if (pieceStylesheet) {
+                try {
+                    const bridgeStyle = document.createElement('style');
+                    bridgeStyle.setAttribute('data-piece-style', `${styleName}-bridge`);
+                    
+                    // Create CSS rules that map .is2d selectors to .cg-wrap selectors
+                    const cssRules = Array.from(pieceStylesheet.cssRules || []);
+                    let bridgeCSS = `/* CSS Bridge for ${styleName} piece set */\n`;
+                    
+                    cssRules.forEach(rule => {
+                        if (rule.selectorText && rule.selectorText.includes('.is2d')) {
+                            // Convert .is2d .pawn.white to .cg-wrap piece.white.pawn
+                            const newSelector = rule.selectorText
+                                .replace(/\.is2d\s+\.(\w+)\.(\w+)/g, '.cg-wrap piece.$2.$1')
+                                .replace(/\.is2d\s+\.(\w+)\s+\.(\w+)/g, '.cg-wrap piece.$2.$1');
+                            
+                            bridgeCSS += `${newSelector} { ${rule.style.cssText} }\n`;
+                        }
+                    });
+                    
+                    bridgeStyle.textContent = bridgeCSS;
+                    document.head.appendChild(bridgeStyle);
+                    console.log(`♟️ Added CSS bridge for ${styleName} with ${cssRules.length} rules`);
+                    
+                } catch (error) {
+                    console.warn(`♟️ Could not read CSS rules for ${styleName}:`, error);
+                    // Fallback: just ensure the .is2d class is present
+                    this.boardContainer.classList.add('is2d');
+                }
+            } else {
+                console.warn(`♟️ Could not find stylesheet for ${styleName}`);
+                // Fallback: just ensure the .is2d class is present
+                this.boardContainer.classList.add('is2d');
+            }
+        }, 100); // Small delay to ensure CSS is loaded
     }
 
     async loadInitialPieceSet() {
