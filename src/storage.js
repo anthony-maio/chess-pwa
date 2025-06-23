@@ -7,6 +7,7 @@ const STORAGE_KEYS = {
     PIECE_SET: 'chess_piece_set',
     THEME: 'chess_theme',
     DIFFICULTY: 'chess_difficulty',
+    SOUND_ENABLED: 'chess_sound_enabled',
     GAME_STATE: 'chess_game_state'
 };
 

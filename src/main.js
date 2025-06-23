@@ -1,6 +1,7 @@
 import Game from './game.js';
 import ChessUI from './ui.js';
 import * as ai from './ai.js'; // Import AI module
+import { saveToLocalStorage, getFromLocalStorage, STORAGE_KEYS } from './storage.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const game = new Game();
@@ -25,9 +26,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const promoteBishopBtn = document.getElementById('promote-bishop');
     const promoteKnightBtn = document.getElementById('promote-knight');
 
+    // --- Settings Management ---
+    const DEFAULT_SETTINGS = {
+        difficulty: 'easy',
+        theme: 'green', 
+        pieceStyle: 'horsey',
+        soundEnabled: true
+    };
+
+    // Load settings from localStorage or use defaults
+    const loadSettings = () => {
+        return {
+            difficulty: getFromLocalStorage(STORAGE_KEYS.DIFFICULTY, DEFAULT_SETTINGS.difficulty),
+            theme: getFromLocalStorage(STORAGE_KEYS.THEME, DEFAULT_SETTINGS.theme),
+            pieceStyle: getFromLocalStorage(STORAGE_KEYS.PIECE_SET, DEFAULT_SETTINGS.pieceStyle),
+            soundEnabled: getFromLocalStorage(STORAGE_KEYS.SOUND_ENABLED, DEFAULT_SETTINGS.soundEnabled)
+        };
+    };
+
+    // Save setting to localStorage
+    const saveSetting = (key, value) => {
+        saveToLocalStorage(key, value);
+        console.log(`💾 Saved setting ${key}: ${value}`);
+    };
+
+    // Apply loaded settings to UI elements
+    const applySettingsToUI = (settings) => {
+        if (difficultySelector) {
+            difficultySelector.value = settings.difficulty;
+        }
+        if (themeSelector) {
+            themeSelector.value = settings.theme;
+        }
+        if (pieceStyleSelector) {
+            pieceStyleSelector.value = settings.pieceStyle;
+        }
+        if (soundCheckbox) {
+            soundCheckbox.checked = settings.soundEnabled;
+        }
+    };
+
+    // Load initial settings
+    const currentSettings = loadSettings();
+    console.log('🔧 Loaded settings:', currentSettings);
+
     // --- AI State Variables ---
     let isAIActive = false; // True when AI is playing
-    let currentDifficulty = "Medium"; // Default difficulty
+    let currentDifficulty = currentSettings.difficulty; // Use saved difficulty
     let playerColor = 'w';    // Player is White, AI is Black
     let aiReady = false;      // True when AI engine has initialized
 
@@ -124,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Disable difficulty selector until AI is ready
     if (difficultySelector) {
         difficultySelector.disabled = true;
-        currentDifficulty = difficultySelector.value || "Medium"; // Initialize from selector
+        currentDifficulty = currentSettings.difficulty; // Use saved difficulty
     }
 
     // --- Promotion handling variables ---
@@ -409,6 +454,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectedTheme = event.target.value;
             console.log("🎨 Theme changed to:", selectedTheme);
             
+            // Save to localStorage
+            saveSetting(STORAGE_KEYS.THEME, selectedTheme);
+            
             ui.setTheme(selectedTheme);
             
             // Show visual feedback
@@ -431,6 +479,9 @@ document.addEventListener('DOMContentLoaded', () => {
         pieceStyleSelector.addEventListener('change', async (event) => {
             const selectedStyle = event.target.value;
             console.log("♟️ Piece style changed to:", selectedStyle);
+            
+            // Save to localStorage (setPieceStyle already saves via PieceManager, but let's be explicit)
+            saveSetting(STORAGE_KEYS.PIECE_SET, selectedStyle);
             
             // Show loading feedback
             if (statusBar) {
@@ -457,13 +508,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (difficultySelector) {
-        // Initialize currentDifficulty from selector's default value if not already done
-        currentDifficulty = difficultySelector.value || "medium";
+        // Initialize currentDifficulty from saved settings
+        currentDifficulty = currentSettings.difficulty;
         console.log(`Initial difficulty set to: ${currentDifficulty}`);
 
         difficultySelector.addEventListener('change', (event) => {
             currentDifficulty = event.target.value;
             console.log("🎯 Difficulty changed to:", currentDifficulty);
+            
+            // Save to localStorage
+            saveSetting(STORAGE_KEYS.DIFFICULTY, currentDifficulty);
             
             // Show visual feedback immediately
             if (statusBar) {
@@ -486,6 +540,25 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 difficultySelector.style.background = '';
             }, 1000);
+        });
+    }
+
+    // --- Sound Settings Event Listeners ---
+    if (soundCheckbox) {
+        soundCheckbox.addEventListener('change', (event) => {
+            const soundEnabled = event.target.checked;
+            console.log('🔊 Sound setting changed to:', soundEnabled);
+            
+            // Save to localStorage
+            saveSetting(STORAGE_KEYS.SOUND_ENABLED, soundEnabled);
+            
+            // Show visual feedback
+            if (statusBar) {
+                statusBar.textContent = `🔊 Sound ${soundEnabled ? 'enabled' : 'disabled'}`;
+                setTimeout(() => {
+                    updateStatus();
+                }, 2000);
+            }
         });
     }
 
@@ -512,15 +585,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Initial Setup ---
-    // The initial board state and status will be set after the initial piece set is loaded by ui.loadInitialPieceSet()
-    // ui.updateBoard(game); // Render the initial board state
-    // updateStatus();       // Set the initial status message
+    // Apply loaded settings to UI elements
+    applySettingsToUI(currentSettings);
+    
+    // Apply saved theme and piece style
+    ui.setTheme(currentSettings.theme);
     
     // Ensure initial piece set is loaded and then update board and status
     ui.loadInitialPieceSet().then(() => {
         ui.updateBoard(game);
         updateStatus();
         console.log("Chess PWA main.js initialized with AI integration attempt.");
+        console.log("🎨 Applied saved settings:", currentSettings);
     });
 
 });

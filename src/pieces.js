@@ -6,7 +6,7 @@ import { saveToLocalStorage, getFromLocalStorage, STORAGE_KEYS } from './storage
  */
 class PieceManager {
     constructor() {
-        this.selectedSet = getFromLocalStorage(STORAGE_KEYS.PIECE_SET, 'cburnett'); // Default to 'cburnett'
+        this.selectedSet = getFromLocalStorage(STORAGE_KEYS.PIECE_SET, 'horsey'); // Default to 'horsey'
     }
 
     /**
