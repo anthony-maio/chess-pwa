@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusBar = document.getElementById('status-bar');
     const historyContent = document.getElementById('history-content');
     const newGameBtn = document.getElementById('new-game-btn');
+    const playAsBlackBtn = document.getElementById('play-as-black-btn');
     const undoBtn = document.getElementById('undo-btn');
     const flipBoardBtn = document.getElementById('flip-board-btn');
     const themeSelector = document.getElementById('theme-selector');
@@ -69,6 +70,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load initial settings
     const currentSettings = loadSettings();
     console.log('🔧 Loaded settings:', currentSettings);
+
+    // --- Game Management Functions ---
+    const startNewGame = (playerAsWhite = true) => {
+        game.resetGame();
+        playerColor = playerAsWhite ? 'w' : 'b';
+        
+        // Set board orientation to player's perspective
+        ui.ground.set({ 
+            orientation: playerAsWhite ? 'white' : 'black',
+            viewOnly: false
+        }); 
+        ui.updateBoard(game);
+        updateStatus();
+
+        // If player is black, AI should make the first move
+        if (!playerAsWhite && isAIActive && aiReady && !game.getGameStatus().isGameOver) {
+            statusBar.textContent = "AI is thinking...";
+            ui.ground.set({ viewOnly: true });
+            setTimeout(() => {
+                ai.requestAIMove(game.getFen(), currentDifficulty);
+            }, 500);
+        }
+
+        const colorName = playerAsWhite ? 'White' : 'Black';
+        console.log(`New game started. Player as ${colorName}.`);
+    };
 
     // --- AI State Variables ---
     let isAIActive = false; // True when AI is playing
@@ -385,19 +412,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Event Listeners for UI Controls ---
     if (newGameBtn) {
         newGameBtn.addEventListener('click', () => {
-            game.resetGame();
-            playerColor = 'w'; // Player always starts as white for now
-            ui.ground.set({ 
-                orientation: 'white', // Player's perspective
-                viewOnly: false      // Ensure board is interactive
-            }); 
-            ui.updateBoard(game);
-            updateStatus();
+            startNewGame(true); // Player as White
+        });
+    }
 
-            // AI doesn't move first if player is white.
-            // If player could choose black, logic here would trigger AI's first move if aiReady.
-            // e.g., if (isAIActive && playerColor === 'b' && aiReady && !game.getGameStatus().isGameOver) { ... }
-            console.log("New game started. Player as White.");
+    if (playAsBlackBtn) {
+        playAsBlackBtn.addEventListener('click', () => {
+            startNewGame(false); // Player as Black
         });
     }
 
@@ -444,7 +465,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (flipBoardBtn) {
         flipBoardBtn.addEventListener('click', () => {
-            ui.flipBoard(); // ChessUI handles its own orientation state
+            const moveCount = game.chess.history().length;
+            const currentOrientation = ui.ground.state.orientation;
+            
+            // Smart flip: offer to switch colors if game just started (≤2 moves)
+            if (moveCount <= 2 && isAIActive) {
+                const newPlayerAsWhite = currentOrientation === 'black';
+                const colorName = newPlayerAsWhite ? 'White' : 'Black';
+                
+                if (confirm(`Restart game and play as ${colorName}?`)) {
+                    startNewGame(newPlayerAsWhite);
+                    return;
+                }
+            }
+            
+            // Regular flip - just change board view
+            ui.flipBoard();
             console.log("Board flipped.");
         });
     }
