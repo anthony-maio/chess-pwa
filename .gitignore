@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Dependencies
 node_modules
 
@@ -15,3 +16,21 @@ dist
 # OS generated files
 .DS_Store
 Thumbs.db
+=======
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# Vite cache
+.vite/
+
+# IDE/editor directories
+.idea/
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+>>>>>>> dba231674b79a7db4b888f7053ef6546a2400a8b
