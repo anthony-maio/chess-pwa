@@ -102,6 +102,9 @@ class ChessUI {
             lastMove: lastMoveForGround,
             // orientation: this.ground.state.orientation, // Keep current orientation
         });
+
+        // Update captured pieces display
+        this.updateCapturedPieces(gameInstance);
     }
     
     // Helper to find the king's square for check highlighting
@@ -339,6 +342,81 @@ class ChessUI {
         const initialSet = this.pieceManager.getSelectedSet() || 'horsey';
         console.log(`UI: Loading initial piece set: ${initialSet}`);
         await this.setPieceStyle(initialSet); // Use the setPieceStyle method to load and apply
+    }
+
+    // Update the captured pieces display
+    updateCapturedPieces(gameInstance) {
+        if (!gameInstance) return;
+
+        const captured = gameInstance.getCapturedPieces();
+        const currentPieceStyle = this.pieceManager.getSelectedSet() || 'horsey';
+
+        // Update white captures (pieces captured by white)
+        this.updateCapturedPanel('white-captures', captured.white, 'black', currentPieceStyle);
+        
+        // Update black captures (pieces captured by black)
+        this.updateCapturedPanel('black-captures', captured.black, 'white', currentPieceStyle);
+    }
+
+    // Update a single captured pieces panel
+    updateCapturedPanel(panelId, capturedPieces, pieceColor, pieceStyle) {
+        const panel = document.getElementById(panelId);
+        if (!panel) return;
+
+        const listContainer = panel.querySelector('.captured-pieces-list');
+        if (!listContainer) return;
+
+        // Clear existing content
+        listContainer.innerHTML = '';
+
+        // Sort pieces by type (pawns first, then pieces in standard order)
+        const pieceOrder = ['p', 'n', 'b', 'r', 'q'];
+        capturedPieces.sort((a, b) => {
+            return pieceOrder.indexOf(a.type) - pieceOrder.indexOf(b.type);
+        });
+
+        // Create elements for each captured piece type
+        capturedPieces.forEach(({ type, count }) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'captured-pieces-item';
+
+            // Create piece icon
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'captured-piece-icon';
+            
+            // Map piece type to class name
+            const pieceClassMap = {
+                'p': 'pawn',
+                'n': 'knight',
+                'b': 'bishop',
+                'r': 'rook',
+                'q': 'queen',
+                'k': 'king' // shouldn't happen but included for completeness
+            };
+            
+            const pieceClass = pieceClassMap[type] || type;
+            
+            // Set background image using the current piece style
+            const pieceUrl = `${import.meta.env.BASE_URL}pieces/${pieceStyle}/${pieceColor}${type.toUpperCase()}.svg`;
+            iconSpan.style.backgroundImage = `url(${pieceUrl})`;
+
+            // Create count text
+            const countSpan = document.createElement('span');
+            countSpan.className = 'captured-piece-count';
+            countSpan.textContent = `×${count}`;
+
+            itemDiv.appendChild(iconSpan);
+            itemDiv.appendChild(countSpan);
+            listContainer.appendChild(itemDiv);
+        });
+
+        // If no captured pieces, show a placeholder
+        if (capturedPieces.length === 0) {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'text-xs text-gray-400 text-center';
+            placeholder.textContent = 'None';
+            listContainer.appendChild(placeholder);
+        }
     }
 }
 

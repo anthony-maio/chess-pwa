@@ -526,6 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             await ui.setPieceStyle(selectedStyle);
             ui.updateBoard(game); // Re-render board with new pieces
+            ui.updateCapturedPieces(game); // Update captured pieces with new style
             
             // Show completion feedback
             if (statusBar) {

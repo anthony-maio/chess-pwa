@@ -145,6 +145,48 @@ class Game {
     getPiece(square) {
         return this.chess.get(square);
     }
+
+    /**
+     * @method getCapturedPieces
+     * @description Gets all captured pieces from the move history.
+     * @returns {object} An object with 'white' and 'black' arrays containing captured pieces with counts.
+     *                   Each item has { type: 'p', count: 2 } format.
+     */
+    getCapturedPieces() {
+        const history = this.chess.history({ verbose: true });
+        const captured = {
+            white: {}, // pieces captured by white (black pieces)
+            black: {}  // pieces captured by black (white pieces)
+        };
+
+        // Process move history to find captured pieces
+        history.forEach(move => {
+            if (move.captured) {
+                // Determine which color captured the piece
+                const capturingColor = move.color;
+                const capturedList = capturingColor === 'w' ? captured.white : captured.black;
+                
+                // Increment count for this piece type
+                if (!capturedList[move.captured]) {
+                    capturedList[move.captured] = 0;
+                }
+                capturedList[move.captured]++;
+            }
+        });
+
+        // Convert to array format with counts
+        const formatCaptured = (capturedObj) => {
+            return Object.entries(capturedObj).map(([type, count]) => ({
+                type,
+                count
+            }));
+        };
+
+        return {
+            white: formatCaptured(captured.white),
+            black: formatCaptured(captured.black)
+        };
+    }
 }
 
 export default Game;
