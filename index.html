@@ -86,20 +86,20 @@
 
         <main class="main-content flex flex-col flex-grow">
             <div id="board-area" class="flex-grow flex justify-center items-center p-2">
-                <div class="flex items-center gap-2 sm:gap-4">
+                <div class="flex items-center gap-2 sm:gap-4 w-full max-w-2xl mx-auto">
                     <!-- White captured pieces panel -->
-                    <div id="white-captures" class="captured-pieces-panel bg-gray-100 p-2 rounded-md shadow-md">
-                        <h3 class="text-xs font-semibold text-gray-600 mb-2 text-center">White Captures</h3>
+                    <div id="white-captures" class="captured-pieces-panel bg-gray-100 p-1 sm:p-2 rounded-md shadow-md">
+                        <h3 class="text-xs font-semibold text-gray-600 mb-1 text-center">White</h3>
                         <div class="captured-pieces-list space-y-1"></div>
                     </div>
                     
-                    <div id="board-container" class="board-container w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl aspect-square bg-white shadow-lg rounded-md border border-gray-300">
+                    <div id="board-container" class="board-container flex-1 max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl aspect-square bg-white shadow-lg rounded-md border border-gray-300">
                         <!-- Chessboard will be rendered here by Chessground -->
                     </div>
                     
                     <!-- Black captured pieces panel -->
-                    <div id="black-captures" class="captured-pieces-panel bg-gray-100 p-2 rounded-md shadow-md">
-                        <h3 class="text-xs font-semibold text-gray-600 mb-2 text-center">Black Captures</h3>
+                    <div id="black-captures" class="captured-pieces-panel bg-gray-100 p-1 sm:p-2 rounded-md shadow-md">
+                        <h3 class="text-xs font-semibold text-gray-600 mb-1 text-center">Black</h3>
                         <div class="captured-pieces-list space-y-1"></div>
                     </div>
                 </div>

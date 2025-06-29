@@ -9,28 +9,29 @@ body {
 
 /* Captured pieces panel styles */
 .captured-pieces-panel {
-  width: 80px;
-  min-height: 200px;
+  width: 60px;
+  min-height: 150px;
+  flex-shrink: 0;
 }
 
 @media (min-width: 640px) {
   .captured-pieces-panel {
-    width: 100px;
-    min-height: 300px;
+    width: 80px;
+    min-height: 200px;
   }
 }
 
 .captured-pieces-item {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 14px;
+  gap: 2px;
+  font-size: 12px;
   color: #374151;
 }
 
 .captured-piece-icon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -39,8 +40,27 @@ body {
 
 @media (min-width: 640px) {
   .captured-piece-icon {
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Ensure the board container maintains proper size */
+#board-area {
+  max-width: 100%;
+}
+
+#board-area > div {
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+@media (min-width: 640px) {
+  #board-area > div {
+    gap: 16px;
   }
 }
 
