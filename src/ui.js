@@ -397,7 +397,9 @@ class ChessUI {
             const pieceClass = pieceClassMap[type] || type;
             
             // Set background image using the current piece style
-            const pieceUrl = `${import.meta.env.BASE_URL}pieces/${pieceStyle}/${pieceColor}${type.toUpperCase()}.svg`;
+            // Convert pieceColor from 'white'/'black' to 'w'/'b'
+            const colorLetter = pieceColor === 'white' ? 'w' : 'b';
+            const pieceUrl = `${import.meta.env.BASE_URL}pieces/${pieceStyle}/${colorLetter}${type.toUpperCase()}.svg`;
             iconSpan.style.backgroundImage = `url(${pieceUrl})`;
 
             // Create count text
